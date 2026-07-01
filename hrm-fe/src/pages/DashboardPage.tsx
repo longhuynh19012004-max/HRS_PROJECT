@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { getHomeOverview } from "../data/homeOverview";
 
+
 const iconMap = {
   people: Users,
   time: Clock3,
@@ -55,7 +56,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
             <LayoutDashboard size={18} />
             Dashboard
           </Link>
-          <Link className="nav-item" to="/dashboard">
+          <Link className="nav-item" to="/employee">
             <Users size={18} />
             Employees
           </Link>
@@ -97,10 +98,10 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
               <LogOut size={17} />
               Logout
             </button>
-            <button className="primary-button">
+            <Link className="primary-button link-button" to="/dashboard/new">
               <Plus size={18} />
               Add Employee
-            </button>
+            </Link>
           </div>
         </header>
 

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { AddEmployeePage } from "./pages/AddEmployeePage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { EmployeePage } from "./pages/EmployeePage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
@@ -73,6 +75,30 @@ export function App() {
         element={
           isAuthenticated && role === "admin" ? (
             <DashboardPage onLogout={handleLogout} />
+          ) : isAuthenticated ? (
+            <Navigate replace to="/home" />
+          ) : (
+            <Navigate replace to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/dashboard/new"
+        element={
+          isAuthenticated && role === "admin" ? (
+            <AddEmployeePage onLogout={handleLogout} />
+          ) : isAuthenticated ? (
+            <Navigate replace to="/home" />
+          ) : (
+            <Navigate replace to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/employee"
+        element={
+          isAuthenticated && role === "admin" ? (
+            <EmployeePage onLogout={handleLogout} />
           ) : isAuthenticated ? (
             <Navigate replace to="/home" />
           ) : (
