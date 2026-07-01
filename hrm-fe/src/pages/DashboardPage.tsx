@@ -20,6 +20,7 @@ import {
   Users,
 } from "lucide-react";
 import { getHomeOverview } from "../data/homeOverview";
+import { AppSettings } from "../types/settings";
 
 
 const iconMap = {
@@ -30,11 +31,70 @@ const iconMap = {
 };
 
 type DashboardPageProps = {
+  settings: AppSettings;
   onLogout: () => void;
 };
 
-export function DashboardPage({ onLogout }: DashboardPageProps) {
+const copy = {
+  en: {
+    dashboard: "Dashboard",
+    employees: "Employees",
+    recruiting: "Recruiting",
+    schedule: "Schedule",
+    settings: "Settings",
+    logout: "Logout",
+    eyebrow: "Employee Management",
+    greeting: "Good morning, Olivia",
+    search: "Search employees, teams...",
+    addEmployee: "Add Employee",
+    filter: "Filter",
+    export: "Export",
+    week: "Week",
+    month: "Month",
+    quarter: "Quarter",
+    directory: "Employee Directory",
+    directoryHelp: "Recently updated profiles and employment status.",
+    today: "Today",
+    todayHelp: "Operational signals for HR teams.",
+    department: "Department Overview",
+    departmentHelp: "Headcount, hiring needs, and current payroll allocation.",
+    signOutTitle: "Sign out of admin dashboard?",
+    signOutHelp: "You will return to the login screen and leave the admin workspace.",
+    cancel: "Cancel",
+    signOut: "Sign Out",
+  },
+  vi: {
+    dashboard: "Bảng điều khiển",
+    employees: "Nhân viên",
+    recruiting: "Tuyển dụng",
+    schedule: "Lịch làm việc",
+    settings: "Cài đặt",
+    logout: "Đăng xuất",
+    eyebrow: "Quản lý nhân viên",
+    greeting: "Chào buổi sáng, Olivia",
+    search: "Tìm nhân viên, phòng ban...",
+    addEmployee: "Thêm nhân viên",
+    filter: "Lọc",
+    export: "Xuất file",
+    week: "Tuần",
+    month: "Tháng",
+    quarter: "Quý",
+    directory: "Danh sách nhân viên",
+    directoryHelp: "Hồ sơ được cập nhật gần đây và trạng thái làm việc.",
+    today: "Hôm nay",
+    todayHelp: "Tín hiệu vận hành cho đội ngũ HR.",
+    department: "Tổng quan phòng ban",
+    departmentHelp: "Số lượng nhân sự, nhu cầu tuyển dụng và phân bổ lương.",
+    signOutTitle: "Đăng xuất khỏi dashboard admin?",
+    signOutHelp: "Bạn sẽ quay lại màn hình đăng nhập và rời workspace admin.",
+    cancel: "Hủy",
+    signOut: "Đăng xuất",
+  },
+};
+
+export function DashboardPage({ settings, onLogout }: DashboardPageProps) {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const t = copy[settings.language];
   const { data, isLoading } = useQuery({
     queryKey: ["home-overview"],
     queryFn: getHomeOverview,
@@ -54,27 +114,27 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         <nav className="nav-list" aria-label="Primary navigation">
           <Link className="nav-item active" to="/dashboard">
             <LayoutDashboard size={18} />
-            Dashboard
+            {t.dashboard}
           </Link>
           <Link className="nav-item" to="/employee">
             <Users size={18} />
-            Employees
+            {t.employees}
           </Link>
           <Link className="nav-item" to="/dashboard">
             <BriefcaseBusiness size={18} />
-            Recruiting
+            {t.recruiting}
           </Link>
           <Link className="nav-item" to="/dashboard">
             <CalendarDays size={18} />
-            Schedule
+            {t.schedule}
           </Link>
-          <Link className="nav-item" to="/dashboard">
+          <Link className="nav-item" to="/settings">
             <Settings size={18} />
-            Settings
+            {t.settings}
           </Link>
           <button className="nav-item nav-button" onClick={() => setIsLogoutConfirmOpen(true)} type="button">
             <LogOut size={18} />
-            Logout
+            {t.logout}
           </button>
         </nav>
       </aside>
@@ -82,43 +142,43 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
       <main className="main-content">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Employee Management</p>
-            <h1>Good morning, Olivia</h1>
+            <p className="eyebrow">{t.eyebrow}</p>
+            <h1>{t.greeting}</h1>
           </div>
 
           <div className="topbar-actions">
             <label className="search-field">
               <Search size={18} />
-              <input aria-label="Search employees" placeholder="Search employees, teams..." />
+              <input aria-label={t.search} placeholder={t.search} />
             </label>
             <button className="icon-button" aria-label="Notifications">
               <Bell size={19} />
             </button>
             <button className="secondary-button" onClick={() => setIsLogoutConfirmOpen(true)} type="button">
               <LogOut size={17} />
-              Logout
+              {t.logout}
             </button>
             <Link className="primary-button link-button" to="/dashboard/new">
               <Plus size={18} />
-              Add Employee
+              {t.addEmployee}
             </Link>
           </div>
         </header>
 
         <section className="toolbar" aria-label="Dashboard controls">
           <div className="segmented-control" role="tablist" aria-label="Date range">
-            <button className="selected">Week</button>
-            <button>Month</button>
-            <button>Quarter</button>
+            <button className="selected">{t.week}</button>
+            <button>{t.month}</button>
+            <button>{t.quarter}</button>
           </div>
           <div className="toolbar-actions">
             <button className="secondary-button">
               <Filter size={17} />
-              Filter
+              {t.filter}
             </button>
             <button className="secondary-button">
               <Download size={17} />
-              Export
+              {t.export}
             </button>
           </div>
         </section>
@@ -151,8 +211,8 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
               <div className="panel employee-panel">
                 <div className="panel-header">
                   <div>
-                    <h2>Employee Directory</h2>
-                    <p>Recently updated profiles and employment status.</p>
+                    <h2>{t.directory}</h2>
+                    <p>{t.directoryHelp}</p>
                   </div>
                   <button className="ghost-button">
                     Active
@@ -188,8 +248,8 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
               <div className="panel activity-panel">
                 <div className="panel-header">
                   <div>
-                    <h2>Today</h2>
-                    <p>Operational signals for HR teams.</p>
+                    <h2>{t.today}</h2>
+                    <p>{t.todayHelp}</p>
                   </div>
                 </div>
                 <div className="activity-list">
@@ -209,8 +269,8 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
             <section className="panel department-panel">
               <div className="panel-header">
                 <div>
-                  <h2>Department Overview</h2>
-                  <p>Headcount, hiring needs, and current payroll allocation.</p>
+                  <h2>{t.department}</h2>
+                  <p>{t.departmentHelp}</p>
                 </div>
               </div>
               <div className="department-grid">
@@ -241,16 +301,16 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
               <LogOut size={24} />
             </div>
             <div>
-              <h2 id="dashboard-logout-title">Sign out of admin dashboard?</h2>
-              <p>You will return to the login screen and leave the admin workspace.</p>
+              <h2 id="dashboard-logout-title">{t.signOutTitle}</h2>
+              <p>{t.signOutHelp}</p>
             </div>
             <div className="confirm-actions">
               <button className="secondary-button" onClick={() => setIsLogoutConfirmOpen(false)} type="button">
-                Cancel
+                {t.cancel}
               </button>
               <button className="primary-button" onClick={onLogout} type="button">
                 <LogOut size={18} />
-                Sign Out
+                {t.signOut}
               </button>
             </div>
           </section>

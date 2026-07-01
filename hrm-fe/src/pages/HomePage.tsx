@@ -1,17 +1,77 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Bell,
   CalendarDays,
   CheckCircle2,
   Clock3,
   FileText,
+  House,
   LogOut,
   Plane,
+  Settings,
   UserRound,
 } from "lucide-react";
+import { AppSettings } from "../types/settings";
 
 type HomePageProps = {
+  settings: AppSettings;
   onLogout: () => void;
+};
+
+const copy = {
+  en: {
+    home: "Home",
+    schedule: "Schedule",
+    documents: "Documents",
+    profile: "Profile",
+    settings: "Settings",
+    logout: "Logout",
+    portal: "Employee portal",
+    eyebrow: "Employee Home",
+    welcome: "Welcome back, Maya Chen",
+    intro: "Your personal workspace for schedule, leave, payroll, and HR requests.",
+    attendance: "Attendance",
+    present: "Present",
+    checkedIn: "Checked in at 08:54",
+    leaveBalance: "Leave Balance",
+    leaveAvailable: "Annual leave available",
+    needAck: "Need acknowledgement",
+    todaySchedule: "Today Schedule",
+    scheduleHelp: "Meetings and HR reminders for your workday.",
+    quickActions: "Quick Actions",
+    quickHelp: "Common employee self-service tasks.",
+    signOutTitle: "Sign out of employee portal?",
+    signOutHelp: "You will return to the login screen and leave your employee home.",
+    cancel: "Cancel",
+    signOut: "Sign Out",
+  },
+  vi: {
+    home: "Trang chủ",
+    schedule: "Lịch làm việc",
+    documents: "Tài liệu",
+    profile: "Hồ sơ",
+    settings: "Cài đặt",
+    logout: "Đăng xuất",
+    portal: "Cổng nhân viên",
+    eyebrow: "Trang chủ nhân viên",
+    welcome: "Chào mừng trở lại, Maya Chen",
+    intro: "Không gian cá nhân cho lịch làm việc, nghỉ phép, bảng lương và yêu cầu HR.",
+    attendance: "Chấm công",
+    present: "Có mặt",
+    checkedIn: "Đã check-in lúc 08:54",
+    leaveBalance: "Ngày phép",
+    leaveAvailable: "Ngày phép năm còn lại",
+    needAck: "Cần xác nhận",
+    todaySchedule: "Lịch hôm nay",
+    scheduleHelp: "Cuộc họp và nhắc việc HR trong ngày.",
+    quickActions: "Thao tác nhanh",
+    quickHelp: "Các tác vụ tự phục vụ thường dùng.",
+    signOutTitle: "Đăng xuất khỏi cổng nhân viên?",
+    signOutHelp: "Bạn sẽ quay lại màn hình đăng nhập.",
+    cancel: "Hủy",
+    signOut: "Đăng xuất",
+  },
 };
 
 const scheduleItems = [
@@ -26,12 +86,13 @@ const actionItems = [
   { label: "Update Profile", value: "2 fields missing", icon: UserRound },
 ];
 
-export function HomePage({ onLogout }: HomePageProps) {
+export function HomePage({ settings, onLogout }: HomePageProps) {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const t = copy[settings.language];
 
   return (
-    <main className="user-home">
-      <header className="user-topbar">
+    <div className="app-shell">
+      <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark">P</div>
           <div>
@@ -39,48 +100,83 @@ export function HomePage({ onLogout }: HomePageProps) {
             <span>Employee Portal</span>
           </div>
         </div>
-        <div className="user-actions">
-          <button className="icon-button" aria-label="Notifications">
-            <Bell size={19} />
-          </button>
-          <button className="secondary-button" onClick={() => setIsLogoutConfirmOpen(true)} type="button">
-            <LogOut size={17} />
-            Logout
-          </button>
-        </div>
-      </header>
 
-      <section className="user-hero">
-        <div>
-          <p className="eyebrow">Employee Home</p>
-          <h1>Welcome back, Maya Chen</h1>
-          <p>Your personal workspace for schedule, leave, payroll, and HR requests.</p>
-        </div>
-        <div className="profile-summary">
-          <div className="avatar large-avatar">MC</div>
+        <nav className="nav-list" aria-label="Employee navigation">
+          <Link className="nav-item active" to="/home">
+            <House size={18} />
+            {t.home}
+          </Link>
+          <Link className="nav-item" to="/home">
+            <CalendarDays size={18} />
+            {t.schedule}
+          </Link>
+          <Link className="nav-item" to="/home">
+            <FileText size={18} />
+            {t.documents}
+          </Link>
+          <Link className="nav-item" to="/home">
+            <UserRound size={18} />
+            {t.profile}
+          </Link>
+          <Link className="nav-item" to="/settings">
+            <Settings size={18} />
+            {t.settings}
+          </Link>
+          <button className="nav-item nav-button" onClick={() => setIsLogoutConfirmOpen(true)} type="button">
+            <LogOut size={18} />
+            {t.logout}
+          </button>
+        </nav>
+      </aside>
+
+      <main className="main-content user-home">
+        <header className="topbar">
           <div>
-            <strong>Product Designer</strong>
-            <span>Experience Team</span>
+            <p className="eyebrow">{t.eyebrow}</p>
+            <h1>{t.portal}</h1>
           </div>
-        </div>
-      </section>
+          <div className="topbar-actions">
+            <button className="icon-button" aria-label="Notifications" type="button">
+              <Bell size={19} />
+            </button>
+            <button className="secondary-button" onClick={() => setIsLogoutConfirmOpen(true)} type="button">
+              <LogOut size={17} />
+              {t.logout}
+            </button>
+          </div>
+        </header>
+
+        <section className="user-hero">
+          <div>
+            <p className="eyebrow">{t.eyebrow}</p>
+            <h1>{t.welcome}</h1>
+            <p>{t.intro}</p>
+          </div>
+          <div className="profile-summary">
+            <div className="avatar large-avatar">MC</div>
+            <div>
+              <strong>Product Designer</strong>
+              <span>Experience Team</span>
+            </div>
+          </div>
+        </section>
 
       <section className="user-metric-grid" aria-label="Employee overview">
         <article className="metric-card">
           <div className="metric-icon">
             <CheckCircle2 size={20} />
           </div>
-          <p>Attendance</p>
-          <strong>Present</strong>
-          <span>Checked in at 08:54</span>
+          <p>{t.attendance}</p>
+          <strong>{t.present}</strong>
+          <span>{t.checkedIn}</span>
         </article>
         <article className="metric-card">
           <div className="metric-icon">
             <Plane size={20} />
           </div>
-          <p>Leave Balance</p>
+          <p>{t.leaveBalance}</p>
           <strong>12d</strong>
-          <span>Annual leave available</span>
+          <span>{t.leaveAvailable}</span>
         </article>
         <article className="metric-card">
           <div className="metric-icon">
@@ -88,7 +184,7 @@ export function HomePage({ onLogout }: HomePageProps) {
           </div>
           <p>Documents</p>
           <strong>3</strong>
-          <span>Need acknowledgement</span>
+          <span>{t.needAck}</span>
         </article>
       </section>
 
@@ -96,8 +192,8 @@ export function HomePage({ onLogout }: HomePageProps) {
         <div className="panel">
           <div className="panel-header">
             <div>
-              <h2>Today Schedule</h2>
-              <p>Meetings and HR reminders for your workday.</p>
+              <h2>{t.todaySchedule}</h2>
+              <p>{t.scheduleHelp}</p>
             </div>
             <CalendarDays size={20} />
           </div>
@@ -117,8 +213,8 @@ export function HomePage({ onLogout }: HomePageProps) {
         <div className="panel">
           <div className="panel-header">
             <div>
-              <h2>Quick Actions</h2>
-              <p>Common employee self-service tasks.</p>
+              <h2>{t.quickActions}</h2>
+              <p>{t.quickHelp}</p>
             </div>
             <Clock3 size={20} />
           </div>
@@ -148,21 +244,22 @@ export function HomePage({ onLogout }: HomePageProps) {
               <LogOut size={24} />
             </div>
             <div>
-              <h2 id="home-logout-title">Sign out of employee portal?</h2>
-              <p>You will return to the login screen and leave your employee home.</p>
+              <h2 id="home-logout-title">{t.signOutTitle}</h2>
+              <p>{t.signOutHelp}</p>
             </div>
             <div className="confirm-actions">
               <button className="secondary-button" onClick={() => setIsLogoutConfirmOpen(false)} type="button">
-                Cancel
+                {t.cancel}
               </button>
               <button className="primary-button" onClick={onLogout} type="button">
                 <LogOut size={18} />
-                Sign Out
+                {t.signOut}
               </button>
             </div>
           </section>
         </div>
       ) : null}
-    </main>
+      </main>
+    </div>
   );
 }

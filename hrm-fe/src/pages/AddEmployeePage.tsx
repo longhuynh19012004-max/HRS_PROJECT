@@ -97,7 +97,7 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
             <CalendarDays size={18} />
             Schedule
           </Link>
-          <Link className="nav-item" to="/dashboard">
+          <Link className="nav-item" to="/settings">
             <Settings size={18} />
             Settings
           </Link>
