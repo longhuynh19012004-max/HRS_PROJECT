@@ -105,10 +105,6 @@ export function SettingsPage({ role, settings, onChangeSettings, onLogout }: Set
                 <Users size={18} />
                 {t.employees}
               </Link>
-              <Link className="nav-item" to="/dashboard">
-                <BriefcaseBusiness size={18} />
-                {t.recruiting}
-              </Link>
               <Link className="nav-item" to="/schedule">
                 <CalendarDays size={18} />
                 {t.schedule}
@@ -123,10 +119,6 @@ export function SettingsPage({ role, settings, onChangeSettings, onLogout }: Set
               <Link className="nav-item" to="/schedule">
                 <CalendarDays size={18} />
                 {t.schedule}
-              </Link>
-              <Link className="nav-item" to="/home">
-                <FileText size={18} />
-                {t.documents}
               </Link>
               <Link className="nav-item" to="/home">
                 <UserRound size={18} />

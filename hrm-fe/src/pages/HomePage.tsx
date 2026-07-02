@@ -31,12 +31,17 @@ const copy = {
     eyebrow: "Employee Home",
     welcome: "Welcome back, Maya Chen",
     intro: "Your personal workspace for schedule, leave, payroll, and HR requests.",
-    attendance: "Attendance",
-    present: "Present",
-    checkedIn: "Checked in at 08:54",
+    attendance: "Check-in",
+    present: "08:54",
+    checkedIn: "",
     leaveBalance: "Leave Balance",
-    leaveAvailable: "Annual leave available",
-    needAck: "Need acknowledgement",
+    leaveAvailable: "",
+    checkout: "Check-out",
+    checkoutTime: "18:00",
+    checkoutStatus: "",
+    todayScheduleCard: "Overtime Hours",
+    eventsCount: "8.5h",
+    nextEvent: "",
     todaySchedule: "Today Schedule",
     scheduleHelp: "Meetings and HR reminders for your workday.",
     quickActions: "Quick Actions",
@@ -49,7 +54,6 @@ const copy = {
   vi: {
     home: "Trang chủ",
     schedule: "Lịch làm việc",
-    documents: "Tài liệu",
     profile: "Hồ sơ",
     settings: "Cài đặt",
     logout: "Đăng xuất",
@@ -57,12 +61,17 @@ const copy = {
     eyebrow: "Trang chủ nhân viên",
     welcome: "Chào mừng trở lại, Maya Chen",
     intro: "Không gian cá nhân cho lịch làm việc, nghỉ phép, bảng lương và yêu cầu HR.",
-    attendance: "Chấm công",
-    present: "Có mặt",
-    checkedIn: "Đã check-in lúc 08:54",
+    attendance: "Check-in",
+    present: "08:54",
+    checkedIn: "",
+    checkout: "Check-out",
+    checkoutTime: "18:00",
+    checkoutStatus: "",
     leaveBalance: "Ngày phép",
-    leaveAvailable: "Ngày phép năm còn lại",
-    needAck: "Cần xác nhận",
+    leaveAvailable: "",
+    todayScheduleCard: "Số giờ tăng ca",
+    eventsCount: "8.5h",
+    nextEvent: "",
     todaySchedule: "Lịch hôm nay",
     scheduleHelp: "Cuộc họp và nhắc việc HR trong ngày.",
     quickActions: "Thao tác nhanh",
@@ -109,10 +118,6 @@ export function HomePage({ settings, onLogout }: HomePageProps) {
           <Link className="nav-item" to="/schedule">
             <CalendarDays size={18} />
             {t.schedule}
-          </Link>
-          <Link className="nav-item" to="/home">
-            <FileText size={18} />
-            {t.documents}
           </Link>
           <Link className="nav-item" to="/home">
             <UserRound size={18} />
@@ -168,7 +173,15 @@ export function HomePage({ settings, onLogout }: HomePageProps) {
           </div>
           <p>{t.attendance}</p>
           <strong>{t.present}</strong>
-          <span>{t.checkedIn}</span>
+          {t.checkedIn && <span>{t.checkedIn}</span>}
+        </article>
+        <article className="metric-card">
+          <div className="metric-icon">
+            <LogOut size={20} style={{ transform: "rotate(180deg)" }} />
+          </div>
+          <p>{t.checkout}</p>
+          <strong>{t.checkoutTime}</strong>
+          {t.checkoutStatus && <span>{t.checkoutStatus}</span>}
         </article>
         <article className="metric-card">
           <div className="metric-icon">
@@ -176,15 +189,15 @@ export function HomePage({ settings, onLogout }: HomePageProps) {
           </div>
           <p>{t.leaveBalance}</p>
           <strong>12d</strong>
-          <span>{t.leaveAvailable}</span>
+          {t.leaveAvailable && <span>{t.leaveAvailable}</span>}
         </article>
         <article className="metric-card">
           <div className="metric-icon">
-            <FileText size={20} />
+            <CalendarDays size={20} />
           </div>
-          <p>Documents</p>
-          <strong>3</strong>
-          <span>{t.needAck}</span>
+          <p>{t.todayScheduleCard}</p>
+          <strong>{t.eventsCount}</strong>
+          {t.nextEvent && <span>{t.nextEvent}</span>}
         </article>
       </section>
 

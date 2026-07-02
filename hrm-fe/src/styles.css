@@ -420,7 +420,7 @@ button {
 
 .user-metric-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 18px;
 }
@@ -1428,6 +1428,232 @@ h1 {
   background: rgba(45, 212, 191, 0.1);
 }
 
+/* ── Calendar row wrapper ── */
+.cal-row {
+  display: contents;
+}
+
+/* ── Admin: Add Schedule Section ── */
+.schedule-admin-section {
+  margin-top: 24px;
+  display: grid;
+  gap: 18px;
+}
+
+.schedule-add-trigger {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 20px 22px;
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.schedule-add-trigger:hover {
+  border-color: var(--accent);
+  background: var(--soft);
+}
+
+.schedule-add-trigger-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--accent-strong);
+  background: var(--soft);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.schedule-add-trigger:hover .schedule-add-trigger-icon {
+  color: #ffffff;
+  background: var(--accent);
+}
+
+.schedule-add-trigger strong {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 15px;
+}
+
+.schedule-add-trigger span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* ── Add Schedule Panel ── */
+.schedule-add-panel {
+  animation: schedPanelIn 0.25s ease both;
+}
+
+@keyframes schedPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.schedule-add-form {
+  display: grid;
+  gap: 16px;
+}
+
+.schedule-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.schedule-form-row label {
+  display: grid;
+  gap: 8px;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.schedule-form-row input,
+.schedule-form-row select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--panel);
+  outline: 0;
+  font: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.schedule-form-row input:focus,
+.schedule-form-row select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
+}
+
+.schedule-form-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.schedule-form-actions .primary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Recently Added ── */
+.schedule-recent-list {
+  display: grid;
+  gap: 10px;
+}
+
+.schedule-recent-item {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid #edf1f6;
+  border-radius: 8px;
+  background: #fbfcfe;
+  animation: schedPanelIn 0.25s ease both;
+}
+
+.schedule-recent-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--event-color, var(--accent));
+  background: color-mix(in srgb, var(--event-color, var(--accent)) 12%, transparent);
+}
+
+.schedule-recent-info {
+  min-width: 0;
+}
+
+.schedule-recent-info strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.schedule-recent-info span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.schedule-recent-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.schedule-recent-remove:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: #fee2e2;
+}
+
+/* ── Dark mode: admin section ── */
+.theme-dark .schedule-add-trigger {
+  border-color: var(--line);
+}
+
+.theme-dark .schedule-add-trigger:hover {
+  border-color: var(--accent);
+  background: var(--soft);
+}
+
+.theme-dark .schedule-form-row label {
+  color: var(--ink);
+}
+
+.theme-dark .schedule-form-row input,
+.theme-dark .schedule-form-row select {
+  color: var(--ink);
+  background: var(--panel);
+  border-color: var(--line);
+}
+
+.theme-dark .schedule-recent-item {
+  border-color: var(--line);
+  background: #152232;
+}
+
+.theme-dark .schedule-recent-remove:hover {
+  background: rgba(248, 113, 113, 0.15);
+}
+
+
 @media (max-width: 1120px) {
   .auth-layout {
     grid-template-columns: 1fr;
@@ -1451,6 +1677,7 @@ h1 {
   }
 
   .metric-grid,
+  .user-metric-grid,
   .department-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1604,4 +1831,170 @@ h1 {
   .cal-cell {
     min-height: 80px;
   }
+
+  .schedule-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-form-actions {
+    flex-direction: column;
+  }
+
+  .schedule-recent-item {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+  }
+
+  .schedule-recent-item .status-badge {
+    display: none;
+  }
 }
+
+/* ── Employee selector grid in form ── */
+.employee-selector-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.employee-selector-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.employee-selector-pill:hover {
+  border-color: var(--accent);
+  background: var(--soft);
+}
+
+.employee-selector-pill.selected {
+  border-color: var(--accent);
+  background: var(--soft);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.avatar-mini {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 11px;
+}
+
+.emp-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.emp-info strong {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.emp-info span {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ── Calendar Filter Bar ── */
+.cal-filter-wrapper {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cal-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cal-filter-bar > span {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-pill:hover {
+  border-color: var(--accent);
+  background: var(--soft);
+}
+
+.filter-pill.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.filter-pill-all {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-strong);
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.filter-pill-all:hover {
+  text-decoration: underline;
+}
+
+/* ── Calendar Event Assignee Badge ── */
+.cal-event-assignee-badge {
+  display: inline-flex;
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--muted);
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
+.theme-dark .cal-event-assignee-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+}
+

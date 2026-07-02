@@ -2,10 +2,11 @@ import { HomeOverview } from "../types/employee";
 
 const overview: HomeOverview = {
   metrics: [
-    { label: "Total Employees", value: "248", trend: "+12 this quarter", icon: "people" },
-    { label: "Avg. Time to Hire", value: "18d", trend: "3 days faster", icon: "time" },
-    { label: "Monthly Payroll", value: "$482K", trend: "+4.2% vs last month", icon: "payroll" },
-    { label: "Retention Rate", value: "94%", trend: "+1.8% YoY", icon: "retention" },
+    { label: "Total Employees", value: "248", trend: "", icon: "people" },
+    { label: "Requests Pending", value: "3", trend: "", icon: "time" },
+    { label: "Not Arrived Today", value: "15", trend: "", icon: "people" },
+    { label: "Monthly Payroll", value: "$482K", trend: "", icon: "payroll" },
+
   ],
   departments: [
     { name: "Engineering", headcount: 82, openings: 6, budget: "$176K" },

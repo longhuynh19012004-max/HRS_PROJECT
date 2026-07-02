@@ -89,10 +89,6 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
             <Users size={18} />
             Employees
           </Link>
-          <Link className="nav-item" to="/dashboard">
-            <BriefcaseBusiness size={18} />
-            Recruiting
-          </Link>
           <Link className="nav-item" to="/schedule">
             <CalendarDays size={18} />
             Schedule
