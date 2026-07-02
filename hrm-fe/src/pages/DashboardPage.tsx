@@ -124,7 +124,7 @@ export function DashboardPage({ settings, onLogout }: DashboardPageProps) {
             <BriefcaseBusiness size={18} />
             {t.recruiting}
           </Link>
-          <Link className="nav-item" to="/dashboard">
+          <Link className="nav-item" to="/schedule">
             <CalendarDays size={18} />
             {t.schedule}
           </Link>

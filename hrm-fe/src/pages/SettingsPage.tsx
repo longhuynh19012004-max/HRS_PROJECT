@@ -109,7 +109,7 @@ export function SettingsPage({ role, settings, onChangeSettings, onLogout }: Set
                 <BriefcaseBusiness size={18} />
                 {t.recruiting}
               </Link>
-              <Link className="nav-item" to="/dashboard">
+              <Link className="nav-item" to="/schedule">
                 <CalendarDays size={18} />
                 {t.schedule}
               </Link>
@@ -120,7 +120,7 @@ export function SettingsPage({ role, settings, onChangeSettings, onLogout }: Set
                 <House size={18} />
                 {t.home}
               </Link>
-              <Link className="nav-item" to="/home">
+              <Link className="nav-item" to="/schedule">
                 <CalendarDays size={18} />
                 {t.schedule}
               </Link>
@@ -162,14 +162,6 @@ export function SettingsPage({ role, settings, onChangeSettings, onLogout }: Set
               <h2>{t.appearance}</h2>
               <p>{t.appearanceHelp}</p>
             </div>
-            <label className="toggle-row">
-              <span>{t.darkMode}</span>
-              <input
-                checked={settings.theme === "dark"}
-                onChange={(event) => updateTheme(event.target.checked ? "dark" : "light")}
-                type="checkbox"
-              />
-            </label>
             <div className="segmented-control settings-segment" role="tablist" aria-label={t.appearance}>
               <button
                 className={settings.theme === "light" ? "selected" : ""}

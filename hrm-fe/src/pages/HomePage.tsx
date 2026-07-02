@@ -106,7 +106,7 @@ export function HomePage({ settings, onLogout }: HomePageProps) {
             <House size={18} />
             {t.home}
           </Link>
-          <Link className="nav-item" to="/home">
+          <Link className="nav-item" to="/schedule">
             <CalendarDays size={18} />
             {t.schedule}
           </Link>
