@@ -45,10 +45,6 @@ export function EmployeePage({ onLogout }: EmployeePageProps) {
             <Users size={18} />
             Employees
           </Link>
-          <Link className="nav-item" to="/dashboard">
-            <BriefcaseBusiness size={18} />
-            Recruiting
-          </Link>
           <Link className="nav-item" to="/schedule">
             <CalendarDays size={18} />
             Schedule
@@ -91,16 +87,6 @@ export function EmployeePage({ onLogout }: EmployeePageProps) {
             <button className="selected">All</button>
             <button>Active</button>
             <button>Leave</button>
-          </div>
-          <div className="toolbar-actions">
-            <button className="secondary-button" type="button">
-              <Filter size={17} />
-              Filter
-            </button>
-            <button className="secondary-button" type="button">
-              <Download size={17} />
-              Export
-            </button>
           </div>
         </section>
 

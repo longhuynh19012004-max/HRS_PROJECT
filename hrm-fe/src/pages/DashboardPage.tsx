@@ -120,10 +120,6 @@ export function DashboardPage({ settings, onLogout }: DashboardPageProps) {
             <Users size={18} />
             {t.employees}
           </Link>
-          <Link className="nav-item" to="/dashboard">
-            <BriefcaseBusiness size={18} />
-            {t.recruiting}
-          </Link>
           <Link className="nav-item" to="/schedule">
             <CalendarDays size={18} />
             {t.schedule}
@@ -154,10 +150,6 @@ export function DashboardPage({ settings, onLogout }: DashboardPageProps) {
             <button className="icon-button" aria-label="Notifications">
               <Bell size={19} />
             </button>
-            <button className="secondary-button" onClick={() => setIsLogoutConfirmOpen(true)} type="button">
-              <LogOut size={17} />
-              {t.logout}
-            </button>
             <Link className="primary-button link-button" to="/dashboard/new">
               <Plus size={18} />
               {t.addEmployee}
@@ -165,23 +157,6 @@ export function DashboardPage({ settings, onLogout }: DashboardPageProps) {
           </div>
         </header>
 
-        <section className="toolbar" aria-label="Dashboard controls">
-          <div className="segmented-control" role="tablist" aria-label="Date range">
-            <button className="selected">{t.week}</button>
-            <button>{t.month}</button>
-            <button>{t.quarter}</button>
-          </div>
-          <div className="toolbar-actions">
-            <button className="secondary-button">
-              <Filter size={17} />
-              {t.filter}
-            </button>
-            <button className="secondary-button">
-              <Download size={17} />
-              {t.export}
-            </button>
-          </div>
-        </section>
 
         {isLoading || !data ? (
           <div className="loading-panel">Loading workforce overview...</div>
@@ -198,10 +173,12 @@ export function DashboardPage({ settings, onLogout }: DashboardPageProps) {
                     </div>
                     <p>{metric.label}</p>
                     <strong>{metric.value}</strong>
-                    <span>
-                      <TrendingUp size={15} />
-                      {metric.trend}
-                    </span>
+                    {metric.trend && (
+                      <span>
+                        <TrendingUp size={15} />
+                        {metric.trend}
+                      </span>
+                    )}
                   </article>
                 );
               })}
