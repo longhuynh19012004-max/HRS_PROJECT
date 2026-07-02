@@ -225,147 +225,11 @@ const typeConfig: Record<EventType, { icon: typeof Video; color: string }> = {
   Reminder: { icon: Clock3, color: "#b45309" },
 };
 
-const employees = [
-  { name: "Maya Chen", initials: "MC", role: "Product Designer", status: "Active" },
-  { name: "Ethan Brooks", initials: "EB", role: "Backend Engineer", status: "Onboarding" },
-  { name: "Sophia Patel", initials: "SP", role: "People Partner", status: "Active" },
-  { name: "Liam Carter", initials: "LC", role: "Account Executive", status: "Leave" },
-];
+const employees: { name: string; initials: string; role: string; status: string }[] = [];
 
 const currentWeekDates = getWeekDates(new Date());
 
-const initialScheduleData: ScheduleEntry[] = [
-  {
-    id: "init-1",
-    date: formatDateString(currentWeekDates[0]),
-    slotIndex: 0,
-    event: {
-      title: "Daily team sync",
-      detail: "Product Experience",
-      type: "Meeting",
-      icon: Video,
-      color: "#0f766e",
-      assignee: "Maya Chen",
-    },
-  },
-  {
-    id: "init-2",
-    date: formatDateString(currentWeekDates[0]),
-    slotIndex: 2,
-    event: {
-      title: "Performance check-in",
-      detail: "With Sophia Patel",
-      type: "Check-in",
-      icon: UserRound,
-      color: "#7c3aed",
-      assignee: "Sophia Patel",
-    },
-  },
-  {
-    id: "init-3",
-    date: formatDateString(currentWeekDates[1]),
-    slotIndex: 1,
-    event: {
-      title: "Backend interview",
-      detail: "Platform hiring",
-      type: "Interview",
-      icon: BriefcaseBusiness,
-      color: "#0369a1",
-      assignee: "Ethan Brooks",
-    },
-  },
-  {
-    id: "init-4",
-    date: formatDateString(currentWeekDates[1]),
-    slotIndex: 3,
-    event: {
-      title: "Payroll reminder",
-      detail: "Review pending",
-      type: "Reminder",
-      icon: Clock3,
-      color: "#b45309",
-      assignee: "Liam Carter",
-    },
-  },
-  {
-    id: "init-5",
-    date: formatDateString(currentWeekDates[2]),
-    slotIndex: 0,
-    event: {
-      title: "Sprint planning",
-      detail: "Engineering team",
-      type: "Meeting",
-      icon: Video,
-      color: "#0f766e",
-      assignee: "Maya Chen",
-    },
-  },
-  {
-    id: "init-6",
-    date: formatDateString(currentWeekDates[2]),
-    slotIndex: 2,
-    event: {
-      title: "Design review",
-      detail: "UX team sync",
-      type: "Meeting",
-      icon: Video,
-      color: "#0f766e",
-      assignee: "Maya Chen",
-    },
-  },
-  {
-    id: "init-7",
-    date: formatDateString(currentWeekDates[3]),
-    slotIndex: 1,
-    event: {
-      title: "1:1 with manager",
-      detail: "Career growth",
-      type: "Check-in",
-      icon: UserRound,
-      color: "#7c3aed",
-      assignee: "Sophia Patel",
-    },
-  },
-  {
-    id: "init-8",
-    date: formatDateString(currentWeekDates[3]),
-    slotIndex: 3,
-    event: {
-      title: "Frontend interview",
-      detail: "React candidate",
-      type: "Interview",
-      icon: BriefcaseBusiness,
-      color: "#0369a1",
-      assignee: "Ethan Brooks",
-    },
-  },
-  {
-    id: "init-9",
-    date: formatDateString(currentWeekDates[4]),
-    slotIndex: 0,
-    event: {
-      title: "Weekly standup",
-      detail: "All hands",
-      type: "Meeting",
-      icon: Video,
-      color: "#0f766e",
-      assignee: "Liam Carter",
-    },
-  },
-  {
-    id: "init-10",
-    date: formatDateString(currentWeekDates[4]),
-    slotIndex: 2,
-    event: {
-      title: "Deadline reminder",
-      detail: "Q3 report due",
-      type: "Reminder",
-      icon: Clock3,
-      color: "#b45309",
-      assignee: "Liam Carter",
-    },
-  },
-];
+const initialScheduleData: ScheduleEntry[] = [];
 
 const emptyForm = {
   selectedEmployees: [] as string[],
@@ -617,7 +481,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                 <House size={18} />
                 {t.home}
               </Link>
-              <Link className="nav-item" to="/home">
+              <Link className="nav-item" to="/profile">
                 <UserRound size={18} />
                 {t.profile}
               </Link>
@@ -896,7 +760,6 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                         onChange={(e) =>
                           handleFormChange("title", e.target.value)
                         }
-                        placeholder="e.g. Sprint planning"
                       />
                     </label>
                   </div>
@@ -911,7 +774,6 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                         onChange={(e) =>
                           handleFormChange("detail", e.target.value)
                         }
-                        placeholder="e.g. Engineering team (Leave empty for assignee's name)"
                       />
                     </label>
                   </div>
@@ -1085,7 +947,6 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                         onChange={(e) =>
                           handleLeaveFormChange("reason", e.target.value)
                         }
-                        placeholder="e.g. Family vacation"
                       />
                     </label>
                   </div>

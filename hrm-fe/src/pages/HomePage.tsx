@@ -32,15 +32,15 @@ const copy = {
     welcome: "Welcome back, Maya Chen",
     intro: "Your personal workspace for schedule, leave, payroll, and HR requests.",
     attendance: "Check-in",
-    present: "08:54",
+    present: "--:--",
     checkedIn: "",
     leaveBalance: "Leave Balance",
     leaveAvailable: "",
     checkout: "Check-out",
-    checkoutTime: "18:00",
+    checkoutTime: "--:--",
     checkoutStatus: "",
     todayScheduleCard: "Overtime Hours",
-    eventsCount: "8.5h",
+    eventsCount: "0h",
     nextEvent: "",
     todaySchedule: "Today Schedule",
     scheduleHelp: "Meetings and HR reminders for your workday.",
@@ -62,15 +62,15 @@ const copy = {
     welcome: "Chào mừng trở lại, Maya Chen",
     intro: "Không gian cá nhân cho lịch làm việc, nghỉ phép, bảng lương và yêu cầu HR.",
     attendance: "Check-in",
-    present: "08:54",
+    present: "--:--",
     checkedIn: "",
     checkout: "Check-out",
-    checkoutTime: "18:00",
+    checkoutTime: "--:--",
     checkoutStatus: "",
     leaveBalance: "Ngày phép",
     leaveAvailable: "",
     todayScheduleCard: "Số giờ tăng ca",
-    eventsCount: "8.5h",
+    eventsCount: "0h",
     nextEvent: "",
     todaySchedule: "Lịch hôm nay",
     scheduleHelp: "Cuộc họp và nhắc việc HR trong ngày.",
@@ -83,17 +83,9 @@ const copy = {
   },
 };
 
-const scheduleItems = [
-  { time: "09:00", title: "Daily team sync", detail: "Product Experience team" },
-  { time: "11:30", title: "Performance check-in", detail: "With Sophia Patel" },
-  { time: "15:00", title: "Design review", detail: "Q3 onboarding flow" },
-];
+const scheduleItems: { time: string; title: string; detail: string }[] = [];
 
-const actionItems = [
-  { label: "Request Leave", value: "12 days available", icon: Plane },
-  { label: "View Payslip", value: "June payroll ready", icon: FileText },
-  { label: "Update Profile", value: "2 fields missing", icon: UserRound },
-];
+const actionItems: { label: string; value: string; icon: typeof Plane }[] = [];
 
 export function HomePage({ settings, onLogout }: HomePageProps) {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
@@ -119,7 +111,7 @@ export function HomePage({ settings, onLogout }: HomePageProps) {
             <CalendarDays size={18} />
             {t.schedule}
           </Link>
-          <Link className="nav-item" to="/home">
+          <Link className="nav-item" to="/profile">
             <UserRound size={18} />
             {t.profile}
           </Link>
@@ -188,7 +180,7 @@ export function HomePage({ settings, onLogout }: HomePageProps) {
             <Plane size={20} />
           </div>
           <p>{t.leaveBalance}</p>
-          <strong>12d</strong>
+          <strong>0d</strong>
           {t.leaveAvailable && <span>{t.leaveAvailable}</span>}
         </article>
         <article className="metric-card">
