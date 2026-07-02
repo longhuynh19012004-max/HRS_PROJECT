@@ -5,6 +5,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { EmployeePage } from "./pages/EmployeePage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
+import { ProfilePage } from "./pages/ProfilePage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { SchedulePage } from "./pages/SchedulePage";
 import { SettingsPage } from "./pages/SettingsPage";
@@ -131,6 +132,16 @@ export function App() {
           element={
             isAuthenticated ? (
               <SchedulePage role={role} settings={settings} onLogout={handleLogout} />
+            ) : (
+              <Navigate replace to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            isAuthenticated ? (
+              <ProfilePage settings={settings} onLogout={handleLogout} />
             ) : (
               <Navigate replace to="/login" />
             )

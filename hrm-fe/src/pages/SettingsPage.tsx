@@ -120,7 +120,7 @@ export function SettingsPage({ role, settings, onChangeSettings, onLogout }: Set
                 <CalendarDays size={18} />
                 {t.schedule}
               </Link>
-              <Link className="nav-item" to="/home">
+              <Link className="nav-item" to="/profile">
                 <UserRound size={18} />
                 {t.profile}
               </Link>

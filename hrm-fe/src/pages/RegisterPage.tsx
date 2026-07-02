@@ -8,7 +8,6 @@ type RegisterPageProps = {
 
 export function RegisterPage({ onRegister }: RegisterPageProps) {
   const [fullName, setFullName] = useState("");
-  const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -16,7 +15,7 @@ export function RegisterPage({ onRegister }: RegisterPageProps) {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!fullName.trim() || !company.trim() || !email.includes("@") || password.trim().length < 6) {
+    if (!fullName.trim() || !email.includes("@") || password.trim().length < 6) {
       setError("Complete all fields with a valid work email and a password with at least 6 characters.");
       return;
     }
@@ -48,20 +47,8 @@ export function RegisterPage({ onRegister }: RegisterPageProps) {
             <input
               autoComplete="name"
               onChange={(event) => setFullName(event.target.value)}
-              placeholder="Olivia Martin"
               type="text"
               value={fullName}
-            />
-          </label>
-
-          <label>
-            Company
-            <input
-              autoComplete="organization"
-              onChange={(event) => setCompany(event.target.value)}
-              placeholder="Acme People Team"
-              type="text"
-              value={company}
             />
           </label>
 

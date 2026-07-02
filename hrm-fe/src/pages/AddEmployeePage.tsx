@@ -28,8 +28,6 @@ type EmployeeForm = {
   department: string;
   role: string;
   startDate: string;
-  employmentType: string;
-  manager: string;
   location: string;
   salary: string;
   status: string;
@@ -43,8 +41,6 @@ const initialForm: EmployeeForm = {
   department: "People Operations",
   role: "",
   startDate: "",
-  employmentType: "Full-time",
-  manager: "",
   location: "Ho Chi Minh City",
   salary: "",
   status: "Onboarding",
@@ -138,7 +134,6 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
                   required
                   value={form.firstName}
                   onChange={(event) => updateField("firstName", event.target.value)}
-                  placeholder="Linh"
                 />
               </label>
               <label>
@@ -147,7 +142,6 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
                   required
                   value={form.lastName}
                   onChange={(event) => updateField("lastName", event.target.value)}
-                  placeholder="Nguyen"
                 />
               </label>
               <label>
@@ -159,7 +153,6 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
                     type="email"
                     value={form.email}
                     onChange={(event) => updateField("email", event.target.value)}
-                    placeholder="linh.nguyen@company.com"
                   />
                 </span>
               </label>
@@ -170,7 +163,6 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
                   <input
                     value={form.phone}
                     onChange={(event) => updateField("phone", event.target.value)}
-                    placeholder="+84 90 123 4567"
                   />
                 </span>
               </label>
@@ -202,7 +194,6 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
                   required
                   value={form.role}
                   onChange={(event) => updateField("role", event.target.value)}
-                  placeholder="HR Generalist"
                 />
               </label>
               <label>
@@ -215,31 +206,10 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
                 />
               </label>
               <label>
-                Employment type
-                <select
-                  value={form.employmentType}
-                  onChange={(event) => updateField("employmentType", event.target.value)}
-                >
-                  <option>Full-time</option>
-                  <option>Part-time</option>
-                  <option>Contract</option>
-                  <option>Internship</option>
-                </select>
-              </label>
-              <label>
-                Manager
-                <input
-                  value={form.manager}
-                  onChange={(event) => updateField("manager", event.target.value)}
-                  placeholder="Olivia Chen"
-                />
-              </label>
-              <label>
                 Location
                 <input
                   value={form.location}
                   onChange={(event) => updateField("location", event.target.value)}
-                  placeholder="Ho Chi Minh City"
                 />
               </label>
             </div>
@@ -260,10 +230,6 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
                 <strong>{form.department}</strong>
               </span>
               <span>
-                Type
-                <strong>{form.employmentType}</strong>
-              </span>
-              <span>
                 Status
                 <strong>{form.status}</strong>
               </span>
@@ -276,7 +242,6 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
                   inputMode="numeric"
                   value={form.salary}
                   onChange={(event) => updateField("salary", event.target.value)}
-                  placeholder="25000000"
                 />
               </label>
               <label>
