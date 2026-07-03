@@ -30,6 +30,12 @@ export class UsersController {
     const isInclude = includeDeleted === 'true';
     return this.usersService.findAllAccounts(isInclude);
   }
+  
+  @Get(':id')
+  @ApiOperation({ summary: 'Lấy chi tiết 1 tài khoản nhân viên' })
+  findOne(@Param('id') id: string) {
+    return this.usersService.findAccountById(id);
+  }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Admin cập nhật thông tin nhân sự' })

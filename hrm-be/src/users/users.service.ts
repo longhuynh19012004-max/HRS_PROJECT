@@ -31,16 +31,25 @@ export class UsersService {
     return await this.accountRepository.save(account);
   }
 
-  // 🔍 R - Read (Chi tiết): Tìm tài khoản bằng email (cho Login)
-  async findAccountByEmail(email: string): Promise<Account | null> {
-    return await this.accountRepository.findOne({
-      where: { email },
+  async findAccountById(id: string) {
+    const account = await this.accountRepository.findOne({
+      where: { id },
       relations: { employee: true },
     });
+    if (!account) throw new NotFoundException('Không tìm thấy tài khoản!');
+    return account;
   }
 
-  // 📋 R - Read (Danh sách): Lấy danh sách tài khoản
-  // Thêm tham số includeDeleted để Admin có thể lọc xem ai đã bị xóa
+  async findAccountByEmail(email: string) {
+    const account = await this.accountRepository.findOne({
+      where: { email },
+      relations: { employee: true }, 
+    });
+    
+    return account;
+  }
+
+
   async findAllAccounts(includeDeleted: boolean = false) {
     return await this.accountRepository.find({
       relations: { employee: true },

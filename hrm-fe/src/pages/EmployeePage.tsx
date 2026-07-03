@@ -227,13 +227,13 @@ export function EmployeePage({ onLogout }: EmployeePageProps) {
                         </button>
                       ) : (
                         <>
-                          <button
-                            onClick={() => toast(`Tính năng sửa ID ${account.id} đang được phát triển!`)}
-                            style={{ background: "none", border: "none", color: "#0ea5e9", cursor: "pointer" }}
+                          <Link
+                            to={`/dashboard/edit/${account.id}`}
+                            style={{ color: "#0ea5e9" }}
                             title="Sửa thông tin"
                           >
                             <Edit size={18} />
-                          </button>
+                          </Link>
                           <button
                             onClick={() => handleDelete(account.id, fullName)}
                             style={{ background: "none", border: "none", color: "#e11d48", cursor: "pointer" }}
