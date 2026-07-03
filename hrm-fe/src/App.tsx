@@ -29,9 +29,12 @@ function ScrollToTop() {
 }
 
 export function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [role, setRole] = useState<UserRole>("user");
-  const [settings, setSettings] = useState<AppSettings>({ language: "en", theme: "light" });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem("isAuthenticated") === "true");
+  const [role, setRole] = useState<UserRole>(() => (localStorage.getItem("role") as UserRole) || "user");
+  const [settings, setSettings] = useState<AppSettings>(() => {
+    const saved = localStorage.getItem("settings");
+    return saved ? JSON.parse(saved) : { language: "en", theme: "light" };
+  });
   const navigate = useNavigate();
 
   const getAuthenticatedPath = (userRole: UserRole) => (userRole === "admin" ? "/dashboard" : "/home");
@@ -39,21 +42,32 @@ export function App() {
   const handleLogin = (email: string) => {
     const nextRole: UserRole = email.trim().toLowerCase() === "admin@peopleops.com" ? "admin" : "user";
 
+    localStorage.setItem("isAuthenticated", "true");
+    localStorage.setItem("role", nextRole);
     setRole(nextRole);
     setIsAuthenticated(true);
     navigate(getAuthenticatedPath(nextRole));
   };
 
   const handleRegister = () => {
+    localStorage.setItem("isAuthenticated", "true");
+    localStorage.setItem("role", "user");
     setRole("user");
     setIsAuthenticated(true);
     navigate("/home");
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("role");
     setIsAuthenticated(false);
     setRole("user");
     navigate("/login");
+  };
+
+  const updateSettings = (newSettings: AppSettings) => {
+    localStorage.setItem("settings", JSON.stringify(newSettings));
+    setSettings(newSettings);
   };
 
   const authenticatedPath = getAuthenticatedPath(role);
@@ -135,7 +149,7 @@ export function App() {
               <SettingsPage
                 role={role}
                 settings={settings}
-                onChangeSettings={setSettings}
+                onChangeSettings={updateSettings}
                 onLogout={handleLogout}
               />
             ) : (
