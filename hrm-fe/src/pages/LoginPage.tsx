@@ -1,17 +1,20 @@
 import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { LogIn } from "lucide-react";
+import axiosClient from "../api/axiosClient"; // Đảm bảo đường dẫn này đúng với project của bạn
 
 type LoginPageProps = {
-  onLogin: (email: string) => void;
+  // Cập nhật hàm để truyền cả email và role lấy từ Token ra ngoài
+  onLogin: (email: string, role: "admin" | "user") => void; 
 };
 
 export function LoginPage({ onLogin }: LoginPageProps) {
-  const [email, setEmail] = useState("olivia@peopleops.com");
-  const [password, setPassword] = useState("peopleops");
+  const [email, setEmail] = useState("admin@gmail.com"); // Bạn có thể sửa email mặc định tại đây để test nhanh
+  const [password, setPassword] = useState("123456");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!email.includes("@") || password.trim().length < 6) {
@@ -19,8 +22,30 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       return;
     }
 
-    setError("");
-    onLogin(email);
+    try {
+      setIsLoading(true);
+      setError("");
+
+      const response = await axiosClient.post("/auth/login", { email, password });
+      
+      const token = response.data.access_token;
+      localStorage.setItem("access_token", token);
+
+      const payloadBase64 = token.split(".")[1]; 
+      const decodedPayload = JSON.parse(atob(payloadBase64)); 
+
+      const rawRole = decodedPayload.systemRole || decodedPayload.role || "";
+      const tokenRole = rawRole.toLowerCase() === "admin" ? "admin" : "user";
+
+      console.log("=> Quyền hạn sau khi chuẩn hóa:", tokenRole);
+
+      onLogin(email, tokenRole);
+    } catch (err: any) {
+      const backendError = err.response?.data?.message || "Login failed. Please check your credentials!";
+      setError(backendError);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -66,9 +91,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
           {error ? <p className="form-error">{error}</p> : null}
 
-          <button className="primary-button auth-submit" type="submit">
+          <button className="primary-button auth-submit" type="submit" disabled={isLoading}>
             <LogIn size={18} />
-            Sign In
+            {isLoading ? "Signing In..." : "Sign In"}
           </button>
         </form>
 

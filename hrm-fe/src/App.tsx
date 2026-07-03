@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { AddEmployeePage } from "./pages/AddEmployeePage";
 import { DashboardPage } from "./pages/DashboardPage";
@@ -19,14 +19,33 @@ export function App() {
   const [settings, setSettings] = useState<AppSettings>({ language: "en", theme: "light" });
   const navigate = useNavigate();
 
+  // 🕵️ TỰ ĐỘNG GIỮ ĐĂNG NHẬP KHI REFRESH (F5) TRANG
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      try {
+        const payloadBase64 = token.split(".")[1];
+        const decodedPayload = JSON.parse(atob(payloadBase64));
+        
+        // Đọc trường dữ liệu systemRole từ cấu hình trong jwt.strategy.ts của Backend
+        const tokenRole: UserRole = decodedPayload.systemRole === "admin" ? "admin" : "user";
+        
+        setRole(tokenRole);
+        setIsAuthenticated(true);
+      } catch (e) {
+        // Token lỗi hoặc hết hạn thì dọn dẹp bộ nhớ
+        localStorage.removeItem("access_token");
+      }
+    }
+  }, []);
+
   const getAuthenticatedPath = (userRole: UserRole) => (userRole === "admin" ? "/dashboard" : "/home");
 
-  const handleLogin = (email: string) => {
-    const nextRole: UserRole = email.trim().toLowerCase() === "admin@peopleops.com" ? "admin" : "user";
-
-    setRole(nextRole);
+  // Nhận dữ liệu phân quyền thực tế từ màn hình Login truyền sang
+  const handleLogin = (email: string, tokenRole: UserRole) => {
+    setRole(tokenRole);
     setIsAuthenticated(true);
-    navigate(getAuthenticatedPath(nextRole));
+    navigate(getAuthenticatedPath(tokenRole));
   };
 
   const handleRegister = () => {
@@ -36,6 +55,7 @@ export function App() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("access_token"); // Xóa sạch token khi người dùng bấm đăng xuất
     setIsAuthenticated(false);
     setRole("user");
     navigate("/login");

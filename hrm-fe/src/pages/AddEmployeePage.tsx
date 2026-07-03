@@ -1,5 +1,5 @@
 import { FormEvent, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // 👈 Thêm useNavigate để chuyển trang sau khi lưu
 import {
   ArrowLeft,
   Bell,
@@ -15,6 +15,7 @@ import {
   UserRoundPlus,
   Users,
 } from "lucide-react";
+import axiosClient from "../api/axiosClient"; // 👈 Import cục gọi API của chúng ta
 
 type AddEmployeePageProps = {
   onLogout: () => void;
@@ -43,12 +44,18 @@ const initialForm: EmployeeForm = {
   startDate: "",
   location: "Ho Chi Minh City",
   salary: "",
-  status: "Onboarding",
+  status: "Active", // Sửa mặc định thành Active cho hợp lý
 };
 
 export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
   const [form, setForm] = useState<EmployeeForm>(initialForm);
   const [isSaved, setIsSaved] = useState(false);
+  
+  // 🚀 Thêm State để quản lý trạng thái Loading và Lỗi
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  
+  const navigate = useNavigate();
 
   const employeeName = useMemo(() => {
     const name = `${form.firstName} ${form.lastName}`.trim();
@@ -58,16 +65,49 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
   const updateField = (field: keyof EmployeeForm, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
     setIsSaved(false);
+    setError(""); // Xóa lỗi khi người dùng bắt đầu gõ lại
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsSaved(true);
+    
+    try {
+      setIsLoading(true);
+      setError("");
+      setIsSaved(false);
+
+
+      const { role, ...payload } = form;
+      
+      await axiosClient.post("/users", payload); 
+
+      // 2. Hiển thị thông báo thành công
+      setIsSaved(true);
+
+      // 3. Chuyển hướng người dùng về trang Danh sách sau 1.5 giây
+      setTimeout(() => {
+        navigate("/employee");
+      }, 1500);
+
+    } catch (err: any) {
+      // Bắt lỗi từ Backend
+      const backendError = err.response?.data?.message || "Có lỗi xảy ra khi tạo nhân viên!";
+      
+      // Nếu Backend trả về mảng lỗi (Validation Pipe), nối chúng lại để hiển thị
+      if (Array.isArray(backendError)) {
+        setError(backendError.join(", "));
+      } else {
+        setError(backendError);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="app-shell">
       <aside className="sidebar">
+        {/* ... (GIỮ NGUYÊN PHẦN BRAND VÀ NAV CỦA BẠN) ... */}
         <div className="brand">
           <div className="brand-mark">P</div>
           <div>
@@ -119,102 +159,106 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
         </header>
 
         <form className="employee-form-layout" onSubmit={handleSubmit}>
-          <section className="panel employee-form-panel" aria-labelledby="profile-title">
-            <div className="panel-header">
-              <div>
-                <h2 id="profile-title">Profile details</h2>
-                <p>Core contact information used across the employee record.</p>
+          {/* CỘT BÊN TRÁI: THÔNG TIN CHI TIẾT */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            <section className="panel employee-form-panel" aria-labelledby="profile-title">
+              <div className="panel-header">
+                <div>
+                  <h2 id="profile-title">Profile details</h2>
+                  <p>Core contact information used across the employee record.</p>
+                </div>
               </div>
-            </div>
 
-            <div className="form-grid two-columns">
-              <label>
-                First name
-                <input
-                  required
-                  value={form.firstName}
-                  onChange={(event) => updateField("firstName", event.target.value)}
-                />
-              </label>
-              <label>
-                Last name
-                <input
-                  required
-                  value={form.lastName}
-                  onChange={(event) => updateField("lastName", event.target.value)}
-                />
-              </label>
-              <label>
-                Email
-                <span className="input-with-icon">
-                  <Mail size={17} />
+              <div className="form-grid two-columns">
+                <label>
+                  First name
                   <input
                     required
-                    type="email"
-                    value={form.email}
-                    onChange={(event) => updateField("email", event.target.value)}
+                    value={form.firstName}
+                    onChange={(event) => updateField("firstName", event.target.value)}
                   />
-                </span>
-              </label>
-              <label>
-                Phone
-                <span className="input-with-icon">
-                  <Phone size={17} />
+                </label>
+                <label>
+                  Last name
                   <input
-                    value={form.phone}
-                    onChange={(event) => updateField("phone", event.target.value)}
+                    required
+                    value={form.lastName}
+                    onChange={(event) => updateField("lastName", event.target.value)}
                   />
-                </span>
-              </label>
-            </div>
-          </section>
-
-          <section className="panel employee-form-panel" aria-labelledby="job-title">
-            <div className="panel-header">
-              <div>
-                <h2 id="job-title">Job assignment</h2>
-                <p>Department, role, start date, and reporting line.</p>
+                </label>
+                <label>
+                  Email
+                  <span className="input-with-icon">
+                    <Mail size={17} />
+                    <input
+                      required
+                      type="email"
+                      value={form.email}
+                      onChange={(event) => updateField("email", event.target.value)}
+                    />
+                  </span>
+                </label>
+                <label>
+                  Phone
+                  <span className="input-with-icon">
+                    <Phone size={17} />
+                    <input
+                      value={form.phone}
+                      onChange={(event) => updateField("phone", event.target.value)}
+                    />
+                  </span>
+                </label>
               </div>
-            </div>
+            </section>
 
-            <div className="form-grid two-columns">
-              <label>
-                Department
-                <select value={form.department} onChange={(event) => updateField("department", event.target.value)}>
-                  <option>People Operations</option>
-                  <option>Engineering</option>
-                  <option>Finance</option>
-                  <option>Sales</option>
-                  <option>Customer Success</option>
-                </select>
-              </label>
-              <label>
-                Role
-                <input
-                  required
-                  value={form.role}
-                  onChange={(event) => updateField("role", event.target.value)}
-                />
-              </label>
-              <label>
-                Start date
-                <input
-                  required
-                  type="date"
-                  value={form.startDate}
-                  onChange={(event) => updateField("startDate", event.target.value)}
-                />
-              </label>
-              <label>
-                Location
-                <input
-                  value={form.location}
-                  onChange={(event) => updateField("location", event.target.value)}
-                />
-              </label>
-            </div>
-          </section>
+            <section className="panel employee-form-panel" aria-labelledby="job-title">
+              <div className="panel-header">
+                <div>
+                  <h2 id="job-title">Job assignment</h2>
+                  <p>Department, role, start date, and reporting line.</p>
+                </div>
+              </div>
 
+              <div className="form-grid two-columns">
+                <label>
+                  Department
+                  <select value={form.department} onChange={(event) => updateField("department", event.target.value)}>
+                    <option value="People Operations">People Operations</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Customer Success">Customer Success</option>
+                  </select>
+                </label>
+                <label>
+                  Role
+                  <input
+                    required
+                    value={form.role}
+                    onChange={(event) => updateField("role", event.target.value)}
+                  />
+                </label>
+                <label>
+                  Start date
+                  <input
+                    required
+                    type="date"
+                    value={form.startDate}
+                    onChange={(event) => updateField("startDate", event.target.value)}
+                  />
+                </label>
+                <label>
+                  Location
+                  <input
+                    value={form.location}
+                    onChange={(event) => updateField("location", event.target.value)}
+                  />
+                </label>
+              </div>
+            </section>
+          </div>
+
+          {/* CỘT BÊN PHẢI: SUMMARY VÀ NÚT SUBMIT */}
           <aside className="panel employee-summary-panel" aria-label="Employee summary">
             <div className="summary-avatar">
               <UserRoundPlus size={28} />
@@ -239,7 +283,9 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
               <label>
                 Salary
                 <input
+                  required
                   inputMode="numeric"
+                  placeholder="VD: 15000000"
                   value={form.salary}
                   onChange={(event) => updateField("salary", event.target.value)}
                 />
@@ -247,23 +293,35 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
               <label>
                 Status
                 <select value={form.status} onChange={(event) => updateField("status", event.target.value)}>
-                  <option>Onboarding</option>
-                  <option>Active</option>
-                  <option>Leave</option>
+                  <option value="Onboarding">Onboarding</option>
+                  <option value="Active">Active</option>
+                  <option value="Leave">Leave</option>
                 </select>
               </label>
             </div>
 
-            {isSaved ? (
-              <div className="success-message" role="status">
-                <CheckCircle2 size={18} />
-                Employee draft saved
+            {/* Hiển thị lỗi hoặc thành công */}
+            {error && (
+              <div className="error-message" style={{ color: 'red', fontSize: '14px', marginTop: '10px' }}>
+                ❌ {error}
               </div>
-            ) : null}
+            )}
+            
+            {isSaved && !error && (
+              <div className="success-message" role="status" style={{ color: 'green', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
+                <CheckCircle2 size={18} />
+                Tạo nhân viên thành công!
+              </div>
+            )}
 
-            <button className="primary-button form-submit-button" type="submit">
+            <button 
+              className="primary-button form-submit-button" 
+              type="submit"
+              disabled={isLoading}
+              style={{ marginTop: '16px' }}
+            >
               <Save size={18} />
-              Save Employee
+              {isLoading ? "Đang lưu..." : "Save Employee"}
             </button>
           </aside>
         </form>
