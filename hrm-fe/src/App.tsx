@@ -1,5 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { AddEmployeePage } from "./pages/AddEmployeePage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { EmployeePage } from "./pages/EmployeePage";
@@ -12,6 +13,20 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { AppSettings } from "./types/settings";
 
 type UserRole = "admin" | "user";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useQuery({
+    queryKey: ["scroll-to-top", pathname],
+    queryFn: () => {
+      window.scrollTo(0, 0);
+      return null;
+    },
+  });
+
+  return null;
+}
 
 export function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -45,6 +60,7 @@ export function App() {
 
   return (
     <div className={`app-root theme-${settings.theme}`}>
+      <ScrollToTop />
       <Routes>
         <Route
           path="/"

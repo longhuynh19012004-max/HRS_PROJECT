@@ -425,6 +425,47 @@ button {
   margin-bottom: 18px;
 }
 
+/* ── Clickable Check-in / Check-out Cards ── */
+.metric-card-action {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  user-select: none;
+}
+
+.metric-card-action:not(.metric-card-done):not(.metric-card-disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  border-color: var(--accent);
+}
+
+.metric-card-action:not(.metric-card-done):not(.metric-card-disabled):active {
+  transform: scale(0.97);
+}
+
+.metric-card-done {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 4%, var(--panel));
+}
+
+.metric-card-disabled {
+  opacity: 0.55;
+}
+
+.metric-card-hint {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.metric-card-success {
+  font-size: 12px;
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.theme-dark .metric-card-success {
+  color: #4ade80;
+}
+
 .user-content-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);

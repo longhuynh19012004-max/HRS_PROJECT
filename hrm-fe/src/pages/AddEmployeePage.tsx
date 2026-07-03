@@ -1,3 +1,4 @@
+import { useMutation } from "@tanstack/react-query";
 import { FormEvent, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -46,6 +47,11 @@ const initialForm: EmployeeForm = {
   status: "Onboarding",
 };
 
+const saveEmployee = async (data: EmployeeForm) => {
+  return new Promise((resolve) => setTimeout(() => resolve(data), 1000));
+};
+
+
 export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
   const [form, setForm] = useState<EmployeeForm>(initialForm);
   const [isSaved, setIsSaved] = useState(false);
@@ -60,9 +66,16 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
     setIsSaved(false);
   };
 
+  const { mutate, isPending } = useMutation({
+    mutationFn: saveEmployee,
+    onSuccess: () => {
+      setIsSaved(true);
+    },
+  });
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsSaved(true);
+    mutate(form);
   };
 
   return (
@@ -261,9 +274,9 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
               </div>
             ) : null}
 
-            <button className="primary-button form-submit-button" type="submit">
+            <button className="primary-button form-submit-button" type="submit" disabled={isPending}>
               <Save size={18} />
-              Save Employee
+              {isPending ? "Saving..." : "Save Employee"}
             </button>
           </aside>
         </form>
