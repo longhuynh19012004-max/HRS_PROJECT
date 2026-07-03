@@ -1,3 +1,4 @@
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -281,6 +282,14 @@ const emptyLeaveForm = {
   reason: "",
 };
 
+const saveSchedule = async (data: { entries: ScheduleEntry[]; ids: string[] }) => {
+  return new Promise((resolve) => setTimeout(() => resolve(data), 800));
+};
+
+const saveLeaveRequest = async (data: { request: LeaveRequest; entries: ScheduleEntry[] }) => {
+  return new Promise((resolve) => setTimeout(() => resolve(data), 800));
+};
+
 export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
   const t = copy[settings.language];
   const isAdmin = role === "admin";
@@ -301,6 +310,29 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
   const referenceDate = new Date(today);
   referenceDate.setDate(today.getDate() + weekOffset * 7);
   const weekDates = getWeekDates(referenceDate);
+
+  const scheduleMutation = useMutation({
+    mutationFn: saveSchedule,
+    onSuccess: (data: any) => {
+      setEntries((prev) => [...prev, ...data.entries]);
+      setAddedIds((prev) => [...prev, ...data.ids]);
+      setSuccessMsg(t.successMsg);
+      setForm({
+        ...emptyForm,
+        date: form.date,
+      });
+    },
+  });
+
+  const leaveMutation = useMutation({
+    mutationFn: saveLeaveRequest,
+    onSuccess: (data: any) => {
+      setLeaveRequests((prev) => [...prev, data.request]);
+      setEntries((prev) => [...prev, ...data.entries]);
+      setSuccessLeaveMsg(t.successLeaveMsg);
+      setLeaveForm(emptyLeaveForm);
+    },
+  });
 
   const handleLeaveFormChange = (field: string, value: any) => {
     setLeaveForm((prev) => ({ ...prev, [field]: value }));
@@ -357,9 +389,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
       });
     });
 
-    setEntries((prev) => [...prev, ...newEntries]);
-    setSuccessLeaveMsg(t.successLeaveMsg);
-    setLeaveForm(emptyLeaveForm);
+    leaveMutation.mutate({ request: newRequest, entries: newEntries });
   };
 
   const handleCancelLeave = (requestId: string) => {
@@ -430,13 +460,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
       };
     });
 
-    setEntries((prev) => [...prev, ...newEntries]);
-    setAddedIds((prev) => [...prev, ...newIds]);
-    setSuccessMsg(t.successMsg);
-    setForm({
-      ...emptyForm,
-      date: form.date, // Preserve date for convenience
-    });
+    scheduleMutation.mutate({ entries: newEntries, ids: newIds });
   };
 
   const handleRemoveAdded = (id: string) => {
@@ -476,21 +500,21 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
               </Link>
             </>
           ) : (
-            <>
-              <Link className="nav-item" to="/home">
-                <House size={18} />
-                {t.home}
-              </Link>
-              <Link className="nav-item" to="/profile">
-                <UserRound size={18} />
-                {t.profile}
-              </Link>
-            </>
+            <Link className="nav-item" to="/home">
+              <House size={18} />
+              {t.home}
+            </Link>
           )}
           <Link className="nav-item active" to="/schedule">
             <CalendarDays size={18} />
             {t.schedule}
           </Link>
+          {!isAdmin && (
+            <Link className="nav-item" to="/profile">
+              <UserRound size={18} />
+              {t.profile}
+            </Link>
+          )}
           <Link className="nav-item" to="/settings">
             <Settings size={18} />
             {t.settings}
@@ -783,11 +807,11 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                     <button
                       className="primary-button"
                       onClick={handleSubmit}
-                      disabled={!isFormValid}
+                      disabled={!isFormValid || scheduleMutation.isPending}
                       type="button"
                     >
                       <Plus size={16} />
-                      {t.addBtn}
+                      {scheduleMutation.isPending ? "Adding..." : t.addBtn}
                     </button>
                     <button
                       className="secondary-button"
@@ -956,11 +980,11 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                     <button
                       className="primary-button"
                       onClick={handleLeaveSubmit}
-                      disabled={!isLeaveFormValid}
+                      disabled={!isLeaveFormValid || leaveMutation.isPending}
                       type="button"
                     >
                       <Plane size={16} />
-                      {t.submitRequest}
+                      {leaveMutation.isPending ? "Submitting..." : t.submitRequest}
                     </button>
                     <button
                       className="secondary-button"
