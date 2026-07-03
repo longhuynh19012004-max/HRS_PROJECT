@@ -89,7 +89,26 @@ const actionItems: { label: string; value: string; icon: typeof Plane }[] = [];
 
 export function HomePage({ settings, onLogout }: HomePageProps) {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const [checkinTime, setCheckinTime] = useState<string | null>(null);
+  const [checkoutTime, setCheckoutTime] = useState<string | null>(null);
   const t = copy[settings.language];
+
+  const getCurrentTime = () => {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  };
+
+  const handleCheckin = () => {
+    if (!checkinTime) {
+      setCheckinTime(getCurrentTime());
+    }
+  };
+
+  const handleCheckout = () => {
+    if (checkinTime && !checkoutTime) {
+      setCheckoutTime(getCurrentTime());
+    }
+  };
 
   return (
     <div className="app-shell">
@@ -159,21 +178,36 @@ export function HomePage({ settings, onLogout }: HomePageProps) {
         </section>
 
       <section className="user-metric-grid" aria-label="Employee overview">
-        <article className="metric-card">
+        <article
+          className={`metric-card metric-card-action${checkinTime ? " metric-card-done" : ""}`}
+          onClick={handleCheckin}
+          role="button"
+          tabIndex={0}
+          style={{ cursor: checkinTime ? "default" : "pointer" }}
+        >
           <div className="metric-icon">
             <CheckCircle2 size={20} />
           </div>
           <p>{t.attendance}</p>
-          <strong>{t.present}</strong>
-          {t.checkedIn && <span>{t.checkedIn}</span>}
+          <strong>{checkinTime || t.present}</strong>
+          {!checkinTime && <span className="metric-card-hint">{settings.language === "vi" ? "Bấm để check-in" : "Tap to check in"}</span>}
+          {checkinTime && <span className="metric-card-success">{settings.language === "vi" ? "Đã check-in" : "Checked in"}</span>}
         </article>
-        <article className="metric-card">
+        <article
+          className={`metric-card metric-card-action${checkoutTime ? " metric-card-done" : ""}${!checkinTime ? " metric-card-disabled" : ""}`}
+          onClick={handleCheckout}
+          role="button"
+          tabIndex={0}
+          style={{ cursor: !checkinTime || checkoutTime ? "default" : "pointer" }}
+        >
           <div className="metric-icon">
             <LogOut size={20} style={{ transform: "rotate(180deg)" }} />
           </div>
           <p>{t.checkout}</p>
-          <strong>{t.checkoutTime}</strong>
-          {t.checkoutStatus && <span>{t.checkoutStatus}</span>}
+          <strong>{checkoutTime || t.checkoutTime}</strong>
+          {!checkoutTime && !checkinTime && <span className="metric-card-hint">{settings.language === "vi" ? "Check-in trước" : "Check in first"}</span>}
+          {!checkoutTime && checkinTime && <span className="metric-card-hint">{settings.language === "vi" ? "Bấm để check-out" : "Tap to check out"}</span>}
+          {checkoutTime && <span className="metric-card-success">{settings.language === "vi" ? "Đã check-out" : "Checked out"}</span>}
         </article>
         <article className="metric-card">
           <div className="metric-icon">
