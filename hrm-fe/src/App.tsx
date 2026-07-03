@@ -13,10 +13,27 @@ import { AppSettings } from "./types/settings";
 
 type UserRole = "admin" | "user";
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useQuery({
+    queryKey: ["scroll-to-top", pathname],
+    queryFn: () => {
+      window.scrollTo(0, 0);
+      return null;
+    },
+  });
+
+  return null;
+}
+
 export function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [role, setRole] = useState<UserRole>("user");
-  const [settings, setSettings] = useState<AppSettings>({ language: "en", theme: "light" });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem("isAuthenticated") === "true");
+  const [role, setRole] = useState<UserRole>(() => (localStorage.getItem("role") as UserRole) || "user");
+  const [settings, setSettings] = useState<AppSettings>(() => {
+    const saved = localStorage.getItem("settings");
+    return saved ? JSON.parse(saved) : { language: "en", theme: "light" };
+  });
   const navigate = useNavigate();
 
   // 🕵️ TỰ ĐỘNG GIỮ ĐĂNG NHẬP KHI REFRESH (F5) TRANG
@@ -49,6 +66,8 @@ export function App() {
   };
 
   const handleRegister = () => {
+    localStorage.setItem("isAuthenticated", "true");
+    localStorage.setItem("role", "user");
     setRole("user");
     setIsAuthenticated(true);
     navigate("/home");
@@ -61,10 +80,16 @@ export function App() {
     navigate("/login");
   };
 
+  const updateSettings = (newSettings: AppSettings) => {
+    localStorage.setItem("settings", JSON.stringify(newSettings));
+    setSettings(newSettings);
+  };
+
   const authenticatedPath = getAuthenticatedPath(role);
 
   return (
     <div className={`app-root theme-${settings.theme}`}>
+      <ScrollToTop />
       <Routes>
         <Route
           path="/"
@@ -139,7 +164,7 @@ export function App() {
               <SettingsPage
                 role={role}
                 settings={settings}
-                onChangeSettings={setSettings}
+                onChangeSettings={updateSettings}
                 onLogout={handleLogout}
               />
             ) : (

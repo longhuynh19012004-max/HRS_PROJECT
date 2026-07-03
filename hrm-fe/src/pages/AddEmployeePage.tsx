@@ -1,3 +1,4 @@
+import { useMutation } from "@tanstack/react-query";
 import { FormEvent, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; // 👈 Thêm useNavigate để chuyển trang sau khi lưu
 import {
@@ -46,6 +47,11 @@ const initialForm: EmployeeForm = {
   salary: "",
   status: "Active", // Sửa mặc định thành Active cho hợp lý
 };
+
+const saveEmployee = async (data: EmployeeForm) => {
+  return new Promise((resolve) => setTimeout(() => resolve(data), 1000));
+};
+
 
 export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
   const [form, setForm] = useState<EmployeeForm>(initialForm);
