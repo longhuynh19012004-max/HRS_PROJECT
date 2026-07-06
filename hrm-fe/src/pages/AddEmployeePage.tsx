@@ -1,5 +1,5 @@
 import { FormEvent, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // 👈 Thêm useNavigate để chuyển trang sau khi lưu
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Bell,
@@ -15,7 +15,9 @@ import {
   UserRoundPlus,
   Users,
 } from "lucide-react";
-import axiosClient from "../api/axiosClient"; // 👈 Import cục gọi API của chúng ta
+import axiosClient from "../api/axiosClient";
+import toast from "react-hot-toast";
+import { NotificationBell } from "../components/NotificationBell";
 
 type AddEmployeePageProps = {
   onLogout: () => void;
@@ -44,17 +46,13 @@ const initialForm: EmployeeForm = {
   startDate: "",
   location: "Ho Chi Minh City",
   salary: "",
-  status: "Active", // Sửa mặc định thành Active cho hợp lý
+  status: "Active",
 };
 
 export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
   const [form, setForm] = useState<EmployeeForm>(initialForm);
-  const [isSaved, setIsSaved] = useState(false);
-  
-  // 🚀 Thêm State để quản lý trạng thái Loading và Lỗi
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  
+
   const navigate = useNavigate();
 
   const employeeName = useMemo(() => {
@@ -64,40 +62,33 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
 
   const updateField = (field: keyof EmployeeForm, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
-    setIsSaved(false);
-    setError(""); // Xóa lỗi khi người dùng bắt đầu gõ lại
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
+
+    const toastId = toast.loading("Saving employee...");
     try {
       setIsLoading(true);
-      setError("");
-      setIsSaved(false);
 
 
       const { role, ...payload } = form;
-      
-      await axiosClient.post("/users", payload); 
 
-      // 2. Hiển thị thông báo thành công
-      setIsSaved(true);
+      await axiosClient.post("/users", payload);
 
-      // 3. Chuyển hướng người dùng về trang Danh sách sau 1.5 giây
+      toast.success("Employee created successfully!", { id: toastId });
+
       setTimeout(() => {
         navigate("/employee");
       }, 1500);
 
     } catch (err: any) {
-      // Bắt lỗi từ Backend
-      const backendError = err.response?.data?.message || "Có lỗi xảy ra khi tạo nhân viên!";
-      
-      // Nếu Backend trả về mảng lỗi (Validation Pipe), nối chúng lại để hiển thị
+      const backendError = err.response?.data?.message || "An error occurred while creating the employee!";
+
       if (Array.isArray(backendError)) {
-        setError(backendError.join(", "));
+        toast.error(backendError.join(", "), { id: toastId });
       } else {
-        setError(backendError);
+        toast.error(backendError, { id: toastId });
       }
     } finally {
       setIsLoading(false);
@@ -107,7 +98,7 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        {/* ... (GIỮ NGUYÊN PHẦN BRAND VÀ NAV CỦA BẠN) ... */}
+        { }
         <div className="brand">
           <div className="brand-mark">P</div>
           <div>
@@ -148,9 +139,7 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
           </div>
 
           <div className="topbar-actions">
-            <button className="icon-button" aria-label="Notifications" type="button">
-              <Bell size={19} />
-            </button>
+            <NotificationBell />
             <Link className="secondary-button link-button" to="/employee">
               <ArrowLeft size={17} />
               Back
@@ -159,7 +148,7 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
         </header>
 
         <form className="employee-form-layout" onSubmit={handleSubmit}>
-          {/* CỘT BÊN TRÁI: THÔNG TIN CHI TIẾT */}
+          {/* LEFT COLUMN: DETAILS */}
           <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
             <section className="panel employee-form-panel" aria-labelledby="profile-title">
               <div className="panel-header">
@@ -258,7 +247,7 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
             </section>
           </div>
 
-          {/* CỘT BÊN PHẢI: SUMMARY VÀ NÚT SUBMIT */}
+          {/* RIGHT COLUMN: SUMMARY AND SUBMIT BUTTON */}
           <aside className="panel employee-summary-panel" aria-label="Employee summary">
             <div className="summary-avatar">
               <UserRoundPlus size={28} />
@@ -285,7 +274,7 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
                 <input
                   required
                   inputMode="numeric"
-                  placeholder="VD: 15000000"
+                  placeholder="Ex: 15000000"
                   value={form.salary}
                   onChange={(event) => updateField("salary", event.target.value)}
                 />
@@ -300,28 +289,15 @@ export function AddEmployeePage({ onLogout }: AddEmployeePageProps) {
               </label>
             </div>
 
-            {/* Hiển thị lỗi hoặc thành công */}
-            {error && (
-              <div className="error-message" style={{ color: 'red', fontSize: '14px', marginTop: '10px' }}>
-                ❌ {error}
-              </div>
-            )}
-            
-            {isSaved && !error && (
-              <div className="success-message" role="status" style={{ color: 'green', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
-                <CheckCircle2 size={18} />
-                Tạo nhân viên thành công!
-              </div>
-            )}
 
-            <button 
-              className="primary-button form-submit-button" 
+            <button
+              className="primary-button form-submit-button"
               type="submit"
               disabled={isLoading}
               style={{ marginTop: '16px' }}
             >
               <Save size={18} />
-              {isLoading ? "Đang lưu..." : "Save Employee"}
+              {isLoading ? "Saving..." : "Save Employee"}
             </button>
           </aside>
         </form>

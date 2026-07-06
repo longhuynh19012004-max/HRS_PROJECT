@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { NotificationBell } from "../components/NotificationBell";
 import {
   Bell,
   CalendarDays,
@@ -14,10 +15,12 @@ import {
   Trash2,
   Users,
   Edit,
-  RotateCcw
+  RotateCcw,
+  Archive,
+  UserX
 } from "lucide-react";
 import axiosClient from "../api/axiosClient";
-import toast, { Toaster } from 'react-hot-toast'; 
+import toast, { Toaster } from 'react-hot-toast';
 
 type EmployeePageProps = {
   onLogout: () => void;
@@ -28,12 +31,10 @@ export function EmployeePage({ onLogout }: EmployeePageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDeleted, setShowDeleted] = useState(false);
 
-  // 🔄 GỌI API TỪ BACKEND
   const { data, isLoading, error } = useQuery<any[]>({
     queryKey: ["employees-list", showDeleted],
     queryFn: async () => {
-      // Khớp tham số includeDeleted với users.controller.ts của bạn
-      const url = showDeleted ? "/users?includeDeleted=true" : "/users"; 
+      const url = showDeleted ? "/users?includeDeleted=true" : "/users";
       const response = await axiosClient.get(url);
       return response.data;
     },
@@ -41,59 +42,67 @@ export function EmployeePage({ onLogout }: EmployeePageProps) {
 
   const accounts = Array.isArray(data) ? data : [];
 
-  // 🗑️ HÀM XÓA (Soft Delete)
   const handleDelete = async (id: string | number, name: string) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn XÓA nhân viên ${name}?`)) return;
-    
-    const toastId = toast.loading("Đang xử lý...");
-    
+    if (!window.confirm(`Are you sure you want to DELETE employee ${name}?`)) return;
+
+    const toastId = toast.loading("Processing...");
+
     try {
       await axiosClient.delete(`/users/${id}`);
       queryClient.invalidateQueries({ queryKey: ["employees-list"] });
-      toast.success(`Đã xóa nhân viên ${name}!`, { id: toastId });
+      toast.success(`Successfully deleted employee ${name}!`, { id: toastId });
     } catch (err: any) {
-      const msg = err.response?.data?.message || "Không thể xóa nhân viên này.";
-      toast.error(`Lỗi: ${Array.isArray(msg) ? msg.join(", ") : msg}`, { id: toastId });
+      const msg = err.response?.data?.message || "Unable to delete this employee.";
+      toast.error(`Error: ${Array.isArray(msg) ? msg.join(", ") : msg}`, { id: toastId });
     }
   };
 
-  // ♻️ HÀM KHÔI PHỤC (Restore)
   const handleRestore = async (id: string | number, name: string) => {
-    if (!window.confirm(`Bạn muốn KHÔI PHỤC tài khoản ${name}?`)) return;
-    
-    const toastId = toast.loading("Đang xử lý...");
+    if (!window.confirm(`Do you want to RESTORE account ${name}?`)) return;
+
+    const toastId = toast.loading("Processing...");
 
     try {
       await axiosClient.patch(`/users/${id}/restore`);
       queryClient.invalidateQueries({ queryKey: ["employees-list"] });
-      toast.success(`Khôi phục thành công ${name}!`, { id: toastId });
+      toast.success(`Successfully restored ${name}!`, { id: toastId });
     } catch (err: any) {
-      const msg = err.response?.data?.message || "Không thể khôi phục.";
-      toast.error(`Lỗi: ${Array.isArray(msg) ? msg.join(", ") : msg}`, { id: toastId });
+      const msg = err.response?.data?.message || "Unable to restore.";
+      toast.error(`Error: ${Array.isArray(msg) ? msg.join(", ") : msg}`, { id: toastId });
     }
   };
 
-  // 🔍 HÀM LỌC DANH SÁCH (Tìm kiếm & Phân loại Đã xóa/Chưa xóa)
+  const handlePermanentDelete = async (id: string | number, name: string) => {
+    if (!window.confirm(`Are you sure you want to PERMANENTLY DELETE employee ${name}? This action cannot be undone!`)) return;
+
+    const toastId = toast.loading("Processing...");
+
+    try {
+      await axiosClient.delete(`/users/${id}/permanent`);
+      queryClient.invalidateQueries({ queryKey: ["employees-list"] });
+      toast.success(`Permanently deleted employee ${name}!`, { id: toastId });
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Unable to permanently delete this employee.";
+      toast.error(`Error: ${Array.isArray(msg) ? msg.join(", ") : msg}`, { id: toastId });
+    }
+  };
+
   const filteredAccounts = accounts.filter((acc) => {
     if (!acc) return false;
 
-    // 1. Phân loại theo trạng thái xóa
-    const isDeleted = acc.deletedAt != null; 
-    
+    const isDeleted = acc.deletedAt != null;
+
     if (showDeleted) {
-      // Đang xem Thùng Rác -> Nếu tài khoản chưa xóa thì giấu đi
       if (!isDeleted) return false;
     } else {
-      // Đang xem Bình Thường -> Nếu tài khoản đã xóa thì giấu đi
       if (isDeleted) return false;
     }
 
-    // 2. Tìm kiếm theo tên hoặc email
     const emp = acc.employee || {};
     const fullName = `${emp.firstName || ""} ${emp.lastName || ""}`.toLowerCase();
     const email = (acc.email || "").toLowerCase();
     const search = searchQuery.toLowerCase();
-    
+
     return fullName.includes(search) || email.includes(search);
   });
 
@@ -107,7 +116,7 @@ export function EmployeePage({ onLogout }: EmployeePageProps) {
 
   return (
     <div className="app-shell">
-      {/* Cấu hình thư viện thông báo góc phải trên */}
+      {/* Toast notification config */}
       <Toaster position="top-right" reverseOrder={false} />
 
       <aside className="sidebar">
@@ -134,8 +143,8 @@ export function EmployeePage({ onLogout }: EmployeePageProps) {
             <h1>Employees</h1>
           </div>
           <div className="topbar-actions">
-            <button className="icon-button"><Bell size={19} /></button>
-            <Link className="primary-button link-button" to="/dashboard/new"><Plus size={17} />Add Employee</Link>
+            <NotificationBell />
+            <Link className="primary-button link-button" to="/employee/new"><Plus size={17} />Add Employee</Link>
           </div>
         </header>
 
@@ -143,7 +152,7 @@ export function EmployeePage({ onLogout }: EmployeePageProps) {
           <span className="search-field">
             <Search size={18} />
             <input
-              placeholder="Tìm kiếm nhân viên theo tên hoặc email..."
+              placeholder="Search employees by name or email..."
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -151,16 +160,15 @@ export function EmployeePage({ onLogout }: EmployeePageProps) {
           </span>
 
           <div className="button-group">
-            <button 
-              className={showDeleted ? "primary-button" : "secondary-button"} 
+            <button
+              className="secondary-button"
               type="button"
               onClick={() => setShowDeleted(!showDeleted)}
               style={{ backgroundColor: showDeleted ? '#f1f5f9' : '', color: showDeleted ? '#0f172a' : '' }}
             >
-              {showDeleted ? "Đang xem: Đã xóa" : "Xem tài khoản đã xóa"}
+              <Archive size={17} />
+              {showDeleted ? "Viewing: Deleted Accounts" : "View Deleted Accounts"}
             </button>
-            <button className="secondary-button" type="button"><Filter size={17} />Filter</button>
-            <button className="secondary-button" type="button"><Download size={17} />Export</button>
           </div>
         </section>
 
@@ -173,11 +181,11 @@ export function EmployeePage({ onLogout }: EmployeePageProps) {
           </div>
 
           {isLoading ? (
-            <div className="loading-panel">Đang tải danh sách nhân viên từ Backend...</div>
+            <div className="loading-panel">Loading employee list from backend...</div>
           ) : error ? (
-            <div className="loading-panel" style={{ color: "red" }}>Không thể kết nối API.</div>
+            <div className="loading-panel" style={{ color: "red" }}>Unable to connect to API.</div>
           ) : filteredAccounts.length === 0 ? (
-            <div className="loading-panel">Không có dữ liệu.</div>
+            <div className="loading-panel">No data available.</div>
           ) : (
             <div className="employee-table" role="table">
               <div className="table-row table-head" role="row" style={{ display: 'grid', gridTemplateColumns: gridTemplate }}>
@@ -187,14 +195,14 @@ export function EmployeePage({ onLogout }: EmployeePageProps) {
                 <span>Status</span>
                 <span style={{ textAlign: "center" }}>Actions</span>
               </div>
-              
+
               {filteredAccounts.map((account) => {
-                const emp = account.employee || account; 
+                const emp = account.employee || account;
                 const fName = emp.firstName || "";
                 const lName = emp.lastName || "";
-                const fullName = `${fName} ${lName}`.trim() || "Chưa cập nhật tên";
-                
-                const isDeleted = account.deletedAt != null; 
+                const fullName = `${fName} ${lName}`.trim() || "Name not provided";
+
+                const isDeleted = account.deletedAt != null;
                 const statusStr = isDeleted ? "Deleted" : (emp.status || "Active");
 
                 return (
@@ -215,29 +223,38 @@ export function EmployeePage({ onLogout }: EmployeePageProps) {
                         {statusStr}
                       </span>
                     </span>
-                    
+
                     <span style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px" }}>
                       {isDeleted ? (
-                        <button
-                          onClick={() => handleRestore(account.id, fullName)}
-                          style={{ background: "none", border: "none", color: "#10b981", cursor: "pointer" }}
-                          title="Khôi phục tài khoản"
-                        >
-                          <RotateCcw size={18} />
-                        </button>
+                        <>
+                          <button
+                            onClick={() => handleRestore(account.id, fullName)}
+                            style={{ background: "none", border: "none", color: "#10b981", cursor: "pointer" }}
+                            title="Restore account"
+                          >
+                            <RotateCcw size={18} />
+                          </button>
+                          <button
+                            onClick={() => handlePermanentDelete(account.id, fullName)}
+                            style={{ background: "none", border: "none", color: "#e11d48", cursor: "pointer" }}
+                            title="Permanently delete"
+                          >
+                            <UserX size={18} />
+                          </button>
+                        </>
                       ) : (
                         <>
                           <Link
                             to={`/dashboard/edit/${account.id}`}
                             style={{ color: "#0ea5e9" }}
-                            title="Sửa thông tin"
+                            title="Edit information"
                           >
                             <Edit size={18} />
                           </Link>
                           <button
                             onClick={() => handleDelete(account.id, fullName)}
                             style={{ background: "none", border: "none", color: "#e11d48", cursor: "pointer" }}
-                            title="Xóa nhân viên"
+                            title="Delete employee"
                           >
                             <Trash2 size={18} />
                           </button>

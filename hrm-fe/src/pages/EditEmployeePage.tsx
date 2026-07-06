@@ -13,14 +13,15 @@ import {
   Users,
 } from "lucide-react";
 import axiosClient from "../api/axiosClient";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import { NotificationBell } from "../components/NotificationBell";
 
 type EditEmployeePageProps = {
   onLogout: () => void;
 };
 
 export function EditEmployeePage({ onLogout }: EditEmployeePageProps) {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -40,7 +41,6 @@ export function EditEmployeePage({ onLogout }: EditEmployeePageProps) {
     status: "",
   });
 
-  // 1. Lấy dữ liệu cũ từ Database đổ vào Form
   useEffect(() => {
     async function fetchEmployee() {
       try {
@@ -54,14 +54,14 @@ export function EditEmployeePage({ onLogout }: EditEmployeePageProps) {
           email: acc.email || "",
           phone: emp.phone || "",
           department: emp.department || "Engineering",
-          position: emp.position || "", // 🚀 HỨNG ĐÚNG TRƯỜNG POSITION TỪ BACKEND
+          position: emp.position || "",
           startDate: emp.startDate || "",
           location: emp.location || "",
           salary: String(emp.salary || ""),
           status: emp.status || "Active",
         });
       } catch (error) {
-        toast.error("Không thể lấy dữ liệu nhân viên!");
+        toast.error("Unable to fetch employee data!");
       } finally {
         setIsFetching(false);
       }
@@ -73,43 +73,36 @@ export function EditEmployeePage({ onLogout }: EditEmployeePageProps) {
     setForm((current) => ({ ...current, [field]: value }));
   };
 
-  // 2. Xử lý lưu dữ liệu (Cập nhật)
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const toastId = toast.loading("Đang cập nhật...");
+    const toastId = toast.loading("Updating...");
 
     try {
       setIsLoading(true);
-      
-      // 🚀 CHỈ BÓC TÁCH EMAIL RA (Vì email thuộc bảng Account không cho sửa ở đây)
-      // payload lúc này sẽ giữ lại trường 'position' để gửi lên cho Backend lưu vào DB
+
       const { email, ...payload } = form;
 
-      // Gửi 'payload' chuẩn chỉnh lên Backend
       await axiosClient.patch(`/users/${id}`, payload);
-      
-      // Xóa cache để làm mới trang danh sách nhân viên
+
       queryClient.invalidateQueries({ queryKey: ["employees-list"] });
-      
-      toast.success("Cập nhật thành công!", { id: toastId });
-      
+
+      toast.success("Update successful!", { id: toastId });
+
       setTimeout(() => {
-        navigate("/employee"); 
+        navigate("/employee");
       }, 1000);
     } catch (err: any) {
-      const msg = err.response?.data?.message || "Lỗi khi cập nhật";
+      const msg = err.response?.data?.message || "Error updating";
       toast.error(Array.isArray(msg) ? msg.join(", ") : msg, { id: toastId });
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (isFetching) return <div className="loading-panel">Đang tải dữ liệu nhân viên...</div>;
+  if (isFetching) return <div className="loading-panel">Loading employee data...</div>;
 
   return (
     <div className="app-shell">
-      <Toaster position="top-right" />
-      
       {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="brand">
@@ -139,9 +132,7 @@ export function EditEmployeePage({ onLogout }: EditEmployeePageProps) {
         <header className="topbar">
           <div><p className="eyebrow">Employee Management</p><h1>Edit Employee</h1></div>
           <div className="topbar-actions">
-            <button className="icon-button" aria-label="Notifications" type="button">
-              <Bell size={19} />
-            </button>
+            <NotificationBell />
             <Link className="secondary-button link-button" to="/employee"><ArrowLeft size={17} />Back</Link>
           </div>
         </header>
@@ -153,7 +144,7 @@ export function EditEmployeePage({ onLogout }: EditEmployeePageProps) {
               <div className="form-grid two-columns">
                 <label>First name<input required value={form.firstName} onChange={(e) => updateField("firstName", e.target.value)} /></label>
                 <label>Last name<input required value={form.lastName} onChange={(e) => updateField("lastName", e.target.value)} /></label>
-                <label>Email (Chỉ xem)<input disabled value={form.email} style={{ backgroundColor: '#f1f5f9' }} /></label>
+                <label>Email (Read-only)<input disabled value={form.email} style={{ backgroundColor: '#f1f5f9' }} /></label>
                 <label>Phone<input value={form.phone} onChange={(e) => updateField("phone", e.target.value)} /></label>
               </div>
             </section>
@@ -170,7 +161,7 @@ export function EditEmployeePage({ onLogout }: EditEmployeePageProps) {
                     <option value="Customer Success">Customer Success</option>
                   </select>
                 </label>
-                {/* 🚀 ĐỔI VALUE VÀ ONCHANGE THÀNH POSITION */}
+                {/* 🚀 CHANGE VALUE AND ONCHANGE TO POSITION */}
                 <label>Role / Position<input required value={form.position} onChange={(e) => updateField("position", e.target.value)} /></label>
                 <label>Start date<input required type="date" value={form.startDate} onChange={(e) => updateField("startDate", e.target.value)} /></label>
                 <label>Location<input value={form.location} onChange={(e) => updateField("location", e.target.value)} /></label>
@@ -180,8 +171,8 @@ export function EditEmployeePage({ onLogout }: EditEmployeePageProps) {
 
           <aside className="panel employee-summary-panel">
             <div className="summary-avatar"><UserRoundPlus size={28} /></div>
-            {/* 🚀 ĐỔI THÀNH POSITION ĐỂ HIỂN THỊ TRÊN THẺ SUMMARY */}
-            <div><h2>{form.firstName} {form.lastName}</h2><p>{form.position || "Chưa có chức vụ"}</p></div>
+            {/* 🚀 CHANGE TO POSITION TO DISPLAY ON SUMMARY CARD */}
+            <div><h2>{form.firstName} {form.lastName}</h2><p>{form.position || "No position assigned"}</p></div>
             <div className="form-grid">
               <label>Salary<input value={form.salary} onChange={(e) => updateField("salary", e.target.value)} /></label>
               <label>Status

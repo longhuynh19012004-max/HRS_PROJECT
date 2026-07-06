@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import {
   Bell,
   CalendarDays,
@@ -13,75 +15,14 @@ import {
   UserRound,
 } from "lucide-react";
 import { AppSettings } from "../types/settings";
+import { NotificationBell } from "../components/NotificationBell";
+import axiosClient from "../api/axiosClient";
 
 type HomePageProps = {
   settings: AppSettings;
   onLogout: () => void;
 };
 
-const copy = {
-  en: {
-    home: "Home",
-    schedule: "Schedule",
-    documents: "Documents",
-    profile: "Profile",
-    settings: "Settings",
-    logout: "Logout",
-    portal: "Employee portal",
-    eyebrow: "Employee Home",
-    welcome: "Welcome back, Maya Chen",
-    intro: "Your personal workspace for schedule, leave, payroll, and HR requests.",
-    attendance: "Check-in",
-    present: "--:--",
-    checkedIn: "",
-    leaveBalance: "Leave Balance",
-    leaveAvailable: "",
-    checkout: "Check-out",
-    checkoutTime: "--:--",
-    checkoutStatus: "",
-    todayScheduleCard: "Overtime Hours",
-    eventsCount: "0h",
-    nextEvent: "",
-    todaySchedule: "Today Schedule",
-    scheduleHelp: "Meetings and HR reminders for your workday.",
-    quickActions: "Quick Actions",
-    quickHelp: "Common employee self-service tasks.",
-    signOutTitle: "Sign out of employee portal?",
-    signOutHelp: "You will return to the login screen and leave your employee home.",
-    cancel: "Cancel",
-    signOut: "Sign Out",
-  },
-  vi: {
-    home: "Trang chủ",
-    schedule: "Lịch làm việc",
-    profile: "Hồ sơ",
-    settings: "Cài đặt",
-    logout: "Đăng xuất",
-    portal: "Cổng nhân viên",
-    eyebrow: "Trang chủ nhân viên",
-    welcome: "Chào mừng trở lại, Maya Chen",
-    intro: "Không gian cá nhân cho lịch làm việc, nghỉ phép, bảng lương và yêu cầu HR.",
-    attendance: "Check-in",
-    present: "--:--",
-    checkedIn: "",
-    checkout: "Check-out",
-    checkoutTime: "--:--",
-    checkoutStatus: "",
-    leaveBalance: "Ngày phép",
-    leaveAvailable: "",
-    todayScheduleCard: "Số giờ tăng ca",
-    eventsCount: "0h",
-    nextEvent: "",
-    todaySchedule: "Lịch hôm nay",
-    scheduleHelp: "Cuộc họp và nhắc việc HR trong ngày.",
-    quickActions: "Thao tác nhanh",
-    quickHelp: "Các tác vụ tự phục vụ thường dùng.",
-    signOutTitle: "Đăng xuất khỏi cổng nhân viên?",
-    signOutHelp: "Bạn sẽ quay lại màn hình đăng nhập.",
-    cancel: "Hủy",
-    signOut: "Đăng xuất",
-  },
-};
 
 const scheduleItems: { time: string; title: string; detail: string }[] = [];
 
@@ -89,24 +30,61 @@ const actionItems: { label: string; value: string; icon: typeof Plane }[] = [];
 
 export function HomePage({ settings, onLogout }: HomePageProps) {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
-  const [checkinTime, setCheckinTime] = useState<string | null>(null);
-  const [checkoutTime, setCheckoutTime] = useState<string | null>(null);
-  const t = copy[settings.language];
+  const queryClient = useQueryClient();
+  const [profile, setProfile] = useState<{ firstName: string; lastName: string; position: string; department: string } | null>(null);
+  useEffect(() => {
+    axiosClient.get("/profile/me").then((res) => {
+      setProfile(res.data.employee || null);
+    }).catch(console.error);
+  }, []);
 
-  const getCurrentTime = () => {
-    const now = new Date();
-    return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-  };
+  const { data: attendanceData } = useQuery({
+    queryKey: ["attendance-today"],
+    queryFn: async () => {
+      const res = await axiosClient.get("/attendance/today");
+      return res.data;
+    },
+  });
+
+  const checkinTime = attendanceData?.checkInTime || null;
+  const checkoutTime = attendanceData?.checkOutTime || null;
+
+  const checkInMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axiosClient.post("/attendance/check-in");
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["attendance-today"] });
+      toast.success("Checked in successfully!");
+    },
+  });
+
+  const checkOutMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axiosClient.post("/attendance/check-out");
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["attendance-today"] });
+      toast.success("Checked out successfully!");
+    },
+  });
+
+  const fullName = profile ? `${profile.firstName} ${profile.lastName}`.trim() : "Employee";
+  const position = profile?.position || "Position";
+  const department = profile?.department || "Department";
+  const initials = profile ? `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase() : "??";
 
   const handleCheckin = () => {
     if (!checkinTime) {
-      setCheckinTime(getCurrentTime());
+      checkInMutation.mutate();
     }
   };
 
   const handleCheckout = () => {
     if (checkinTime && !checkoutTime) {
-      setCheckoutTime(getCurrentTime());
+      checkOutMutation.mutate();
     }
   };
 
@@ -124,23 +102,23 @@ export function HomePage({ settings, onLogout }: HomePageProps) {
         <nav className="nav-list" aria-label="Employee navigation">
           <Link className="nav-item active" to="/home">
             <House size={18} />
-            {t.home}
+            Home
           </Link>
           <Link className="nav-item" to="/schedule">
             <CalendarDays size={18} />
-            {t.schedule}
+            Schedule
           </Link>
           <Link className="nav-item" to="/profile">
             <UserRound size={18} />
-            {t.profile}
+            Profile
           </Link>
           <Link className="nav-item" to="/settings">
             <Settings size={18} />
-            {t.settings}
+            Settings
           </Link>
           <button className="nav-item nav-button" onClick={() => setIsLogoutConfirmOpen(true)} type="button">
             <LogOut size={18} />
-            {t.logout}
+            Logout
           </button>
         </nav>
       </aside>
@@ -148,31 +126,29 @@ export function HomePage({ settings, onLogout }: HomePageProps) {
       <main className="main-content user-home">
         <header className="topbar">
           <div>
-            <p className="eyebrow">{t.eyebrow}</p>
-            <h1>{t.portal}</h1>
+            <p className="eyebrow">Employee Home</p>
+            <h1>Employee portal</h1>
           </div>
           <div className="topbar-actions">
-            <button className="icon-button" aria-label="Notifications" type="button">
-              <Bell size={19} />
-            </button>
+            <NotificationBell />
             <button className="secondary-button" onClick={() => setIsLogoutConfirmOpen(true)} type="button">
               <LogOut size={17} />
-              {t.logout}
+              Logout
             </button>
           </div>
         </header>
 
         <section className="user-hero">
           <div>
-            <p className="eyebrow">{t.eyebrow}</p>
-            <h1>{t.welcome}</h1>
-            <p>{t.intro}</p>
+            <p className="eyebrow">Employee Home</p>
+            <h1>{"Welcome back, {name}".replace("{name}", fullName)}</h1>
+            <p>Your personal workspace for schedule, leave, payroll, and HR requests.</p>
           </div>
           <div className="profile-summary">
-            <div className="avatar large-avatar">MC</div>
+            <div className="avatar large-avatar">{initials}</div>
             <div>
-              <strong>Product Designer</strong>
-              <span>Experience Team</span>
+              <strong>{position}</strong>
+              <span>{department}</span>
             </div>
           </div>
         </section>
@@ -188,10 +164,10 @@ export function HomePage({ settings, onLogout }: HomePageProps) {
           <div className="metric-icon">
             <CheckCircle2 size={20} />
           </div>
-          <p>{t.attendance}</p>
-          <strong>{checkinTime || t.present}</strong>
-          {!checkinTime && <span className="metric-card-hint">{settings.language === "vi" ? "Bấm để check-in" : "Tap to check in"}</span>}
-          {checkinTime && <span className="metric-card-success">{settings.language === "vi" ? "Đã check-in" : "Checked in"}</span>}
+          <p>Check-in</p>
+          <strong>{checkinTime || "--:--"}</strong>
+          {!checkinTime && <span className="metric-card-hint">Tap to check in</span>}
+          {checkinTime && <span className="metric-card-success">Checked in</span>}
         </article>
         <article
           className={`metric-card metric-card-action${checkoutTime ? " metric-card-done" : ""}${!checkinTime ? " metric-card-disabled" : ""}`}
@@ -203,27 +179,27 @@ export function HomePage({ settings, onLogout }: HomePageProps) {
           <div className="metric-icon">
             <LogOut size={20} style={{ transform: "rotate(180deg)" }} />
           </div>
-          <p>{t.checkout}</p>
-          <strong>{checkoutTime || t.checkoutTime}</strong>
-          {!checkoutTime && !checkinTime && <span className="metric-card-hint">{settings.language === "vi" ? "Check-in trước" : "Check in first"}</span>}
-          {!checkoutTime && checkinTime && <span className="metric-card-hint">{settings.language === "vi" ? "Bấm để check-out" : "Tap to check out"}</span>}
-          {checkoutTime && <span className="metric-card-success">{settings.language === "vi" ? "Đã check-out" : "Checked out"}</span>}
+          <p>Check-out</p>
+          <strong>{checkoutTime || "--:--"}</strong>
+          {!checkoutTime && !checkinTime && <span className="metric-card-hint">Check in first</span>}
+          {!checkoutTime && checkinTime && <span className="metric-card-hint">Tap to check out</span>}
+          {checkoutTime && <span className="metric-card-success">Checked out</span>}
         </article>
         <article className="metric-card">
           <div className="metric-icon">
             <Plane size={20} />
           </div>
-          <p>{t.leaveBalance}</p>
+          <p>Leave Balance</p>
           <strong>0d</strong>
-          {t.leaveAvailable && <span>{t.leaveAvailable}</span>}
+          {"" && <span></span>}
         </article>
         <article className="metric-card">
           <div className="metric-icon">
             <CalendarDays size={20} />
           </div>
-          <p>{t.todayScheduleCard}</p>
-          <strong>{t.eventsCount}</strong>
-          {t.nextEvent && <span>{t.nextEvent}</span>}
+          <p>Overtime Hours</p>
+          <strong>0h</strong>
+          {"" && <span></span>}
         </article>
       </section>
 
@@ -231,8 +207,8 @@ export function HomePage({ settings, onLogout }: HomePageProps) {
         <div className="panel">
           <div className="panel-header">
             <div>
-              <h2>{t.todaySchedule}</h2>
-              <p>{t.scheduleHelp}</p>
+              <h2>Today Schedule</h2>
+              <p>Meetings and HR reminders for your workday.</p>
             </div>
             <CalendarDays size={20} />
           </div>
@@ -252,8 +228,8 @@ export function HomePage({ settings, onLogout }: HomePageProps) {
         <div className="panel">
           <div className="panel-header">
             <div>
-              <h2>{t.quickActions}</h2>
-              <p>{t.quickHelp}</p>
+              <h2>Quick Actions</h2>
+              <p>Common employee self-service tasks.</p>
             </div>
             <Clock3 size={20} />
           </div>
@@ -283,16 +259,16 @@ export function HomePage({ settings, onLogout }: HomePageProps) {
               <LogOut size={24} />
             </div>
             <div>
-              <h2 id="home-logout-title">{t.signOutTitle}</h2>
-              <p>{t.signOutHelp}</p>
+              <h2 id="home-logout-title">Sign out of employee portal?</h2>
+              <p>You will return to the login screen and leave your employee home.</p>
             </div>
             <div className="confirm-actions">
               <button className="secondary-button" onClick={() => setIsLogoutConfirmOpen(false)} type="button">
-                {t.cancel}
+                Cancel
               </button>
               <button className="primary-button" onClick={onLogout} type="button">
                 <LogOut size={18} />
-                {t.signOut}
+                Sign Out
               </button>
             </div>
           </section>

@@ -6,10 +6,9 @@ import { Employee } from './entities/employee.entity';
 import { Account } from './entities/account.entity';
 
 @Module({
-  // 👇 Khai báo cả 2 Entity mới vào đây
   imports: [TypeOrmModule.forFeature([Employee, Account])],
   controllers: [UsersController],
   providers: [UsersService],
-  exports: [UsersService], // Xuất ra để AuthModule có thể dùng ké UsersService
+  exports: [UsersService],
 })
-export class UsersModule {}
+export class UsersModule { }

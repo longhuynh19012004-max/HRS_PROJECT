@@ -2,55 +2,60 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } f
 import { UsersService } from './users.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard'; 
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole } from '../auth/enums/role.enum';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 
-@ApiTags('Quản lý Nhân sự (Chỉ ADMIN)')
-@ApiBearerAuth() 
-@UseGuards(JwtAuthGuard, RolesGuard) 
-@Roles(UserRole.ADMIN) // 🔒 KHÓA TỔNG: Chỉ Admin mới được quyền xài tất cả API trong này
-@Controller('users') 
+@ApiTags('Personnel Management (ADMIN Only)')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
+@Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Post()
-  @ApiOperation({ summary: 'Admin tạo hồ sơ nhân viên mới' })
+  @ApiOperation({ summary: 'Admin creates a new employee profile' })
   create(@Body() createEmployeeDto: CreateEmployeeDto) {
     return this.usersService.createNewEmployeeWithAccount(createEmployeeDto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lấy danh sách nhân viên' })
-  @ApiQuery({ name: 'includeDeleted', required: false, type: Boolean, description: 'Truyền true nếu muốn xem cả những nhân viên đã bị xóa' })
+  @ApiOperation({ summary: 'Get employee list' })
+  @ApiQuery({ name: 'includeDeleted', required: false, type: Boolean, description: 'Pass true to include deleted employees' })
   findAll(@Query('includeDeleted') includeDeleted?: string) {
-    // Vì query param nhận vào là string, ta cần convert sang boolean
     const isInclude = includeDeleted === 'true';
     return this.usersService.findAllAccounts(isInclude);
   }
-  
+
   @Get(':id')
-  @ApiOperation({ summary: 'Lấy chi tiết 1 tài khoản nhân viên' })
+  @ApiOperation({ summary: 'Get details of 1 employee account' })
   findOne(@Param('id') id: string) {
     return this.usersService.findAccountById(id);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Admin cập nhật thông tin nhân sự' })
+  @ApiOperation({ summary: 'Admin updates personnel information' })
   update(@Param('id') id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
     return this.usersService.updateEmployee(id, updateEmployeeDto);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Admin xóa (khóa) tài khoản nhân sự' })
+  @ApiOperation({ summary: 'Admin deletes (deactivates) personnel account' })
   remove(@Param('id') id: string) {
     return this.usersService.removeAccount(id);
   }
 
-  @Patch(':id/restore') // 👈 API khôi phục tài khoản
-  @ApiOperation({ summary: 'Admin khôi phục tài khoản nhân sự đã xóa' })
+  @Delete(':id/permanent')
+  @ApiOperation({ summary: 'Admin permanently deletes personnel account' })
+  permanentRemove(@Param('id') id: string) {
+    return this.usersService.permanentRemoveAccount(id);
+  }
+
+  @Patch(':id/restore')
+  @ApiOperation({ summary: 'Admin restores deleted personnel account' })
   restore(@Param('id') id: string) {
     return this.usersService.restoreAccount(id);
   }

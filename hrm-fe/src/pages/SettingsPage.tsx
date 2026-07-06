@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { AppLanguage, AppSettings, AppTheme } from "../types/settings";
+import { NotificationBell } from "../components/NotificationBell";
 
 type SettingsPageProps = {
   role: "admin" | "user";
@@ -22,57 +23,7 @@ type SettingsPageProps = {
   onLogout: () => void;
 };
 
-const copy = {
-  en: {
-    dashboard: "Dashboard",
-    employees: "Employees",
-    recruiting: "Recruiting",
-    schedule: "Schedule",
-    documents: "Documents",
-    profile: "Profile",
-    home: "Home",
-    settings: "Settings",
-    logout: "Logout",
-    title: "Settings",
-    eyebrow: "Workspace Preferences",
-    description: "Control how the portal looks and which language is used across your workspace.",
-    appearance: "Appearance",
-    appearanceHelp: "Switch between light and dark mode.",
-    darkMode: "Dark mode",
-    light: "Light",
-    dark: "Dark",
-    language: "Language",
-    languageHelp: "Choose the display language for key screens.",
-    english: "English",
-    vietnamese: "Vietnamese",
-  },
-  vi: {
-    dashboard: "Bảng điều khiển",
-    employees: "Nhân viên",
-    recruiting: "Tuyển dụng",
-    schedule: "Lịch làm việc",
-    documents: "Tài liệu",
-    profile: "Hồ sơ",
-    home: "Trang chủ",
-    settings: "Cài đặt",
-    logout: "Đăng xuất",
-    title: "Cài đặt",
-    eyebrow: "Tùy chỉnh giao diện",
-    description: "Điều chỉnh giao diện và ngôn ngữ sử dụng trong workspace.",
-    appearance: "Giao diện",
-    appearanceHelp: "Chuyển giữa chế độ sáng và tối.",
-    darkMode: "Chế độ tối",
-    light: "Sáng",
-    dark: "Tối",
-    language: "Ngôn ngữ",
-    languageHelp: "Chọn ngôn ngữ hiển thị cho các màn hình chính.",
-    english: "Tiếng Anh",
-    vietnamese: "Tiếng Việt",
-  },
-};
-
 export function SettingsPage({ role, settings, onChangeSettings, onLogout }: SettingsPageProps) {
-  const t = copy[settings.language];
   const isAdmin = role === "admin";
 
   const updateTheme = (theme: AppTheme) => {
@@ -99,40 +50,40 @@ export function SettingsPage({ role, settings, onChangeSettings, onLogout }: Set
             <>
               <Link className="nav-item" to="/dashboard">
                 <LayoutDashboard size={18} />
-                {t.dashboard}
+                Dashboard
               </Link>
               <Link className="nav-item" to="/employee">
                 <Users size={18} />
-                {t.employees}
+                Employees
               </Link>
               <Link className="nav-item" to="/schedule">
                 <CalendarDays size={18} />
-                {t.schedule}
+                Schedule
               </Link>
             </>
           ) : (
             <>
               <Link className="nav-item" to="/home">
                 <House size={18} />
-                {t.home}
+                Home
               </Link>
               <Link className="nav-item" to="/schedule">
                 <CalendarDays size={18} />
-                {t.schedule}
+                Schedule
               </Link>
               <Link className="nav-item" to="/profile">
                 <UserRound size={18} />
-                {t.profile}
+                Profile
               </Link>
             </>
           )}
           <Link className="nav-item active" to="/settings">
             <Settings size={18} />
-            {t.settings}
+            Settings
           </Link>
           <button className="nav-item nav-button" onClick={onLogout} type="button">
             <LogOut size={18} />
-            {t.logout}
+            Logout
           </button>
         </nav>
       </aside>
@@ -140,8 +91,11 @@ export function SettingsPage({ role, settings, onChangeSettings, onLogout }: Set
       <main className="main-content">
         <header className="topbar">
           <div>
-            <p className="eyebrow">{t.eyebrow}</p>
-            <h1>{t.title}</h1>
+            <p className="eyebrow">Workspace Preferences</p>
+            <h1>Settings</h1>
+          </div>
+          <div className="topbar-actions">
+            <NotificationBell />
           </div>
         </header>
 
@@ -151,52 +105,28 @@ export function SettingsPage({ role, settings, onChangeSettings, onLogout }: Set
               {settings.theme === "dark" ? <Moon size={22} /> : <Sun size={22} />}
             </div>
             <div>
-              <h2>{t.appearance}</h2>
-              <p>{t.appearanceHelp}</p>
+              <h2>Appearance</h2>
+              <p>Switch between light and dark mode.</p>
             </div>
-            <div className="segmented-control settings-segment" role="tablist" aria-label={t.appearance}>
+            <div className="segmented-control settings-segment" role="tablist" aria-label="Appearance">
               <button
                 className={settings.theme === "light" ? "selected" : ""}
                 onClick={() => updateTheme("light")}
                 type="button"
               >
-                {t.light}
+                Light
               </button>
               <button
                 className={settings.theme === "dark" ? "selected" : ""}
                 onClick={() => updateTheme("dark")}
                 type="button"
               >
-                {t.dark}
+                Dark
               </button>
             </div>
           </article>
 
-          <article className="panel settings-panel">
-            <div className="settings-icon">
-              <Languages size={22} />
-            </div>
-            <div>
-              <h2>{t.language}</h2>
-              <p>{t.languageHelp}</p>
-            </div>
-            <div className="segmented-control settings-segment" role="tablist" aria-label={t.language}>
-              <button
-                className={settings.language === "en" ? "selected" : ""}
-                onClick={() => updateLanguage("en")}
-                type="button"
-              >
-                {t.english}
-              </button>
-              <button
-                className={settings.language === "vi" ? "selected" : ""}
-                onClick={() => updateLanguage("vi")}
-                type="button"
-              >
-                {t.vietnamese}
-              </button>
-            </div>
-          </article>
+
         </section>
       </main>
     </div>

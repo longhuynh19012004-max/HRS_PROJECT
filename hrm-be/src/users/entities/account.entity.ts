@@ -1,6 +1,6 @@
-import { 
-  Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, 
-  UpdateDateColumn, DeleteDateColumn, OneToOne, JoinColumn 
+import {
+  Entity, Column, PrimaryGeneratedColumn, CreateDateColumn,
+  UpdateDateColumn, DeleteDateColumn, OneToOne, JoinColumn
 } from 'typeorm';
 import { Employee } from './employee.entity';
 import { UserRole } from '../../auth/enums/role.enum';
@@ -11,28 +11,27 @@ export class Account {
   id!: string;
 
   @Column({ type: 'varchar', unique: true })
-  email!: string; 
+  email!: string;
 
-  @Column({ type: 'varchar', nullable: true }) 
-  password!: string; 
+  @Column({ type: 'varchar', nullable: true })
+  password!: string;
 
   @Column({ type: 'boolean', default: true })
-  isActive!: boolean; 
+  isActive!: boolean;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
-  role!: UserRole; 
+  role!: UserRole;
 
-  // Mối quan hệ 1-1 với bảng employees
   @OneToOne(() => Employee, { cascade: true, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'employeeId' }) 
+  @JoinColumn({ name: 'employeeId' })
   employee!: Employee;
 
   @CreateDateColumn()
-  createdAt!: Date; 
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt!: Date; 
+  updatedAt!: Date;
 
   @DeleteDateColumn()
-  deletedAt?: Date; 
+  deletedAt?: Date;
 }

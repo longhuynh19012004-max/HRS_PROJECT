@@ -15,7 +15,7 @@ export class CreateEmployeeDto {
   @ApiProperty({ example: 'nguyenvana@gmail.com' })
   @IsNotEmpty()
   @IsEmail()
-  email!: string; // Email này vừa là thông tin liên hệ, vừa dùng làm tài khoản đăng nhập luôn
+  email!: string;
 
   @ApiPropertyOptional({ example: '0987654321' })
   @IsOptional()

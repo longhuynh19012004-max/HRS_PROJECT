@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { LeaveRequest } from '../../leave-requests/entities/leave-request.entity';
 
 @Entity('employees')
 export class Employee {
@@ -31,4 +32,7 @@ export class Employee {
 
   @Column({ type: 'varchar', default: 'active' })
   status!: string; 
+
+  @OneToMany(() => LeaveRequest, leaveRequest => leaveRequest.employee)
+  leaveRequests!: LeaveRequest[];
 }

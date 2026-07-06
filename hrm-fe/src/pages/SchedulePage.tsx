@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   BriefcaseBusiness,
@@ -19,8 +19,12 @@ import {
   Users,
   Video,
   X,
+  Check,
 } from "lucide-react";
 import { AppSettings } from "../types/settings";
+import axiosClient from "../api/axiosClient";
+import toast from "react-hot-toast";
+import { NotificationBell } from "../components/NotificationBell";
 
 type SchedulePageProps = {
   role: "admin" | "user";
@@ -76,130 +80,6 @@ function formatMonthYear(dates: Date[], lang: string): string {
   return `${first.toLocaleDateString(locale, monthOpts)} – ${last.toLocaleDateString(locale, opts)}`;
 }
 
-const copy = {
-  en: {
-    dashboard: "Dashboard",
-    employees: "Employees",
-    recruiting: "Recruiting",
-    schedule: "Schedule",
-    documents: "Documents",
-    profile: "Profile",
-    home: "Home",
-    settings: "Settings",
-    logout: "Logout",
-    eyebrow: "Work Calendar",
-    title: "Schedule",
-    today: "Today",
-    weekDays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    weekDaysFull: [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday",
-    ],
-    timeSlots: ["8:00 – 10:00", "10:00 – 12:00", "1:00 – 3:00", "3:00 – 5:00"],
-    noEvents: "No events",
-    addSchedule: "Add Schedule",
-    addScheduleDesc:
-      "Assign a new schedule item to employees. Select one or multiple employees, pick the date, time slot, and details.",
-    employee: "Employees (select one or multiple)",
-    day: "Date",
-    timeSlot: "Time Slot",
-    eventTitle: "Event Title",
-    eventDetail: "Detail",
-    eventType: "Type",
-    addBtn: "Add to Schedule",
-    cancel: "Cancel",
-    selectSlot: "Select time slot...",
-    selectType: "Select type...",
-    successMsg: "Schedule item added successfully for selected employee(s)!",
-    recentlyAdded: "Recently Added",
-    recentlyAddedDesc: "Items you've added this session.",
-    noItemsYet: "No items added yet.",
-    remove: "Remove",
-    filterByEmployee: "Filter by Employee:",
-    clearFilter: "Show All",
-    requestLeave: "Request Leave",
-    requestLeaveDesc: "Submit a new leave request. It will be shown on the calendar as pending approval.",
-    startDate: "Start Date",
-    endDate: "End Date",
-    leaveType: "Leave Type",
-    reason: "Reason",
-    submitRequest: "Submit Leave Request",
-    selectLeaveType: "Select leave type...",
-    annualLeave: "Annual Leave",
-    sickLeave: "Sick Leave",
-    unpaidLeave: "Unpaid Leave",
-    successLeaveMsg: "Leave request submitted successfully! Pending approval.",
-    pending: "Pending",
-    leaveHistory: "Leave History",
-    leaveHistoryDesc: "Your submitted leave requests and their statuses.",
-  },
-  vi: {
-    dashboard: "Bảng điều khiển",
-    employees: "Nhân viên",
-    recruiting: "Tuyển dụng",
-    schedule: "Lịch làm việc",
-    documents: "Tài liệu",
-    profile: "Hồ sơ",
-    home: "Trang chủ",
-    settings: "Cài đặt",
-    logout: "Đăng xuất",
-    eyebrow: "Lịch công việc",
-    title: "Lịch làm việc",
-    today: "Hôm nay",
-    weekDays: ["T2", "T3", "T4", "T5", "T6", "T7", "CN"],
-    weekDaysFull: [
-      "Thứ Hai",
-      "Thứ Ba",
-      "Thứ Tư",
-      "Thứ Năm",
-      "Thứ Sáu",
-      "Thứ Bảy",
-      "Chủ Nhật",
-    ],
-    timeSlots: ["8:00 – 10:00", "10:00 – 12:00", "1:00 – 3:00", "3:00 – 5:00"],
-    noEvents: "Không có sự kiện",
-    addSchedule: "Thêm lịch",
-    addScheduleDesc:
-      "Gán lịch làm việc mới cho nhân viên. Chọn một hoặc nhiều nhân viên, ngày, khung giờ và chi tiết sự kiện.",
-    employee: "Nhân viên (chọn một hoặc nhiều người)",
-    day: "Ngày",
-    timeSlot: "Khung giờ",
-    eventTitle: "Tiêu đề",
-    eventDetail: "Chi tiết",
-    eventType: "Loại",
-    addBtn: "Thêm vào lịch",
-    cancel: "Hủy",
-    selectSlot: "Chọn khung giờ...",
-    selectType: "Chọn loại...",
-    successMsg: "Đã thêm lịch thành công cho các nhân viên được chọn!",
-    recentlyAdded: "Mới thêm gần đây",
-    recentlyAddedDesc: "Các mục bạn đã thêm trong phiên này.",
-    noItemsYet: "Chưa có mục nào.",
-    remove: "Xóa",
-    filterByEmployee: "Lọc theo nhân viên:",
-    clearFilter: "Tất cả",
-    requestLeave: "Xin nghỉ phép",
-    requestLeaveDesc: "Gửi yêu cầu nghỉ phép mới. Lịch trình sẽ hiển thị trạng thái chờ duyệt.",
-    startDate: "Từ ngày",
-    endDate: "Đến ngày",
-    leaveType: "Loại nghỉ phép",
-    reason: "Lý do xin nghỉ",
-    submitRequest: "Gửi yêu cầu nghỉ phép",
-    selectLeaveType: "Chọn loại nghỉ phép...",
-    annualLeave: "Nghỉ phép năm",
-    sickLeave: "Nghỉ bệnh",
-    unpaidLeave: "Nghỉ không lương",
-    successLeaveMsg: "Gửi yêu cầu nghỉ phép thành công! Đang chờ duyệt.",
-    pending: "Chờ duyệt",
-    leaveHistory: "Lịch sử xin nghỉ",
-    leaveHistoryDesc: "Các yêu cầu nghỉ phép đã gửi và trạng thái.",
-  },
-};
 
 type EventType = "Meeting" | "Check-in" | "Interview" | "Reminder";
 
@@ -214,7 +94,7 @@ type CalendarEvent = {
 
 type ScheduleEntry = {
   id: string;
-  date: string; // "YYYY-MM-DD"
+  date: string;
   slotIndex: number;
   event: CalendarEvent;
 };
@@ -226,15 +106,13 @@ const typeConfig: Record<EventType, { icon: typeof Video; color: string }> = {
   Reminder: { icon: Clock3, color: "#b45309" },
 };
 
-const employees: { name: string; initials: string; role: string; status: string }[] = [];
-
 const currentWeekDates = getWeekDates(new Date());
 
 const initialScheduleData: ScheduleEntry[] = [];
 
 const emptyForm = {
-  selectedEmployees: [] as string[],
-  date: "", // "YYYY-MM-DD" format
+  selectedDepartments: [] as string[],
+  date: "",
   slotIndex: "",
   title: "",
   detail: "",
@@ -286,12 +164,8 @@ const saveSchedule = async (data: { entries: ScheduleEntry[]; ids: string[] }) =
   return new Promise((resolve) => setTimeout(() => resolve(data), 800));
 };
 
-const saveLeaveRequest = async (data: { request: LeaveRequest; entries: ScheduleEntry[] }) => {
-  return new Promise((resolve) => setTimeout(() => resolve(data), 800));
-};
 
 export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
-  const t = copy[settings.language];
   const isAdmin = role === "admin";
   const today = new Date();
 
@@ -299,11 +173,72 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
   const [entries, setEntries] = useState<ScheduleEntry[]>(initialScheduleData);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
-  const [successMsg, setSuccessMsg] = useState("");
   const [showLeaveForm, setShowLeaveForm] = useState(false);
   const [leaveForm, setLeaveForm] = useState(emptyLeaveForm);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
-  const [successLeaveMsg, setSuccessLeaveMsg] = useState("");
+  const [profile, setProfile] = useState<{ firstName: string; lastName: string } | null>(null);
+
+  const [employeesList, setEmployeesList] = useState<{ name: string; initials: string; role: string; status: string; department: string }[]>([]);
+
+  useEffect(() => {
+    axiosClient.get("/profile/me")
+      .then((res) => {
+        setProfile(res.data.employee || null);
+      })
+      .catch(console.error);
+
+    const leaveEndpoint = role === "admin" ? "/leave-requests" : "/leave-requests/me";
+    axiosClient.get(leaveEndpoint)
+      .then((res) => {
+        setLeaveRequests(res.data);
+      })
+      .catch(console.error);
+
+    axiosClient.get("/schedules")
+      .then((res) => {
+        const mappedEntries: ScheduleEntry[] = res.data.map((dbSchedule: any) => {
+          const config = typeConfig[dbSchedule.type as EventType] || typeConfig["Meeting"];
+          return {
+            id: dbSchedule.id,
+            date: dbSchedule.date,
+            slotIndex: dbSchedule.slotIndex,
+            event: {
+              title: dbSchedule.title,
+              detail: dbSchedule.detail || "",
+              type: dbSchedule.type as EventType,
+              icon: config.icon,
+              color: config.color,
+              assignee: dbSchedule.assigneeName,
+            }
+          };
+        });
+        setEntries(mappedEntries);
+      })
+      .catch(console.error);
+
+    if (isAdmin) {
+      axiosClient.get("/users")
+        .then((res) => {
+          const list = res.data.map((acc: any) => {
+            const emp = acc.employee || {};
+            const fn = emp.firstName || "Unknown";
+            const ln = emp.lastName || "Employee";
+            return {
+              name: `${fn} ${ln}`.trim(),
+              initials: `${fn.charAt(0)}${ln.charAt(0)}`.toUpperCase(),
+              role: emp.position || "Position",
+              status: emp.status || "active",
+              department: emp.department || "Unassigned",
+            };
+          });
+          setEmployeesList(list);
+        })
+        .catch(console.error);
+    }
+  }, [isAdmin]);
+
+  const fullName = profile ? `${profile.firstName} ${profile.lastName}`.trim() : "Current User";
+
   const [addedIds, setAddedIds] = useState<string[]>([]);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
 
@@ -312,11 +247,23 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
   const weekDates = getWeekDates(referenceDate);
 
   const scheduleMutation = useMutation({
-    mutationFn: saveSchedule,
+    mutationFn: async (data: { entries: ScheduleEntry[]; ids: string[] }) => {
+      const payload = data.entries.map(e => ({
+        id: e.id,
+        date: e.date,
+        slotIndex: e.slotIndex,
+        title: e.event.title,
+        detail: e.event.detail,
+        type: e.event.type,
+        assigneeName: e.event.assignee || "",
+      }));
+      await axiosClient.post("/schedules", payload);
+      return data;
+    },
     onSuccess: (data: any) => {
       setEntries((prev) => [...prev, ...data.entries]);
       setAddedIds((prev) => [...prev, ...data.ids]);
-      setSuccessMsg(t.successMsg);
+      toast.success("Schedule item added successfully for selected employee(s)!");
       setForm({
         ...emptyForm,
         date: form.date,
@@ -325,18 +272,29 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
   });
 
   const leaveMutation = useMutation({
-    mutationFn: saveLeaveRequest,
-    onSuccess: (data: any) => {
-      setLeaveRequests((prev) => [...prev, data.request]);
-      setEntries((prev) => [...prev, ...data.entries]);
-      setSuccessLeaveMsg(t.successLeaveMsg);
+    mutationFn: async (data: { payload: Omit<LeaveRequest, "id" | "status"> }) => {
+      const res = await axiosClient.post("/leave-requests", data.payload);
+      return res.data;
+    },
+    onSuccess: (newRequest: LeaveRequest) => {
+      setLeaveRequests((prev) => [newRequest, ...prev]);
+      toast.success("Leave request submitted successfully! Pending approval.");
       setLeaveForm(emptyLeaveForm);
+    },
+  });
+
+  const updateLeaveStatusMutation = useMutation({
+    mutationFn: async (data: { id: string; status: "Approved" | "Rejected" }) => {
+      const res = await axiosClient.patch(`/leave-requests/${data.id}/status`, { status: data.status });
+      return res.data;
+    },
+    onSuccess: (updatedRequest: LeaveRequest) => {
+      setLeaveRequests((prev) => prev.map((req) => (req.id === updatedRequest.id ? updatedRequest : req)));
     },
   });
 
   const handleLeaveFormChange = (field: string, value: any) => {
     setLeaveForm((prev) => ({ ...prev, [field]: value }));
-    if (successLeaveMsg) setSuccessLeaveMsg("");
   };
 
   const isLeaveFormValid =
@@ -349,52 +307,18 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
   const handleLeaveSubmit = () => {
     if (!isLeaveFormValid || leaveForm.type === "") return;
 
-    const newRequestId = `leave-${Date.now()}`;
-    const newRequest: LeaveRequest = {
-      id: newRequestId,
+    const payload = {
       startDate: leaveForm.startDate,
       endDate: leaveForm.endDate,
       type: leaveForm.type as LeaveType,
       reason: leaveForm.reason,
-      status: "Pending",
     };
 
-    setLeaveRequests((prev) => [...prev, newRequest]);
-
-    const dates = getDatesInRange(leaveForm.startDate, leaveForm.endDate);
-    const leaveColor = leaveForm.type === "Annual" ? "#0f766e" : leaveForm.type === "Sick" ? "#b91c1c" : "#b45309";
-    const leaveTitleMap = {
-      Annual: t.annualLeave,
-      Sick: t.sickLeave,
-      Unpaid: t.unpaidLeave,
-    };
-    const displayTitle = `${leaveTitleMap[leaveForm.type as LeaveType]} (${t.pending})`;
-
-    const newEntries: ScheduleEntry[] = [];
-    dates.forEach((dateStr, dateIdx) => {
-      [0, 1, 2, 3].forEach((slotIdx) => {
-        newEntries.push({
-          id: `${newRequestId}-${dateIdx}-${slotIdx}`,
-          date: dateStr,
-          slotIndex: slotIdx,
-          event: {
-            title: displayTitle,
-            detail: leaveForm.reason,
-            type: "Reminder",
-            icon: Plane,
-            color: leaveColor,
-            assignee: "Maya Chen",
-          },
-        });
-      });
-    });
-
-    leaveMutation.mutate({ request: newRequest, entries: newEntries });
+    leaveMutation.mutate({ payload });
   };
 
   const handleCancelLeave = (requestId: string) => {
     setLeaveRequests((prev) => prev.filter((r) => r.id !== requestId));
-    setEntries((prev) => prev.filter((e) => !e.id.startsWith(requestId)));
   };
 
   const goToPrevWeek = () => setWeekOffset((o) => o - 1);
@@ -403,18 +327,17 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
 
   const handleFormChange = (field: string, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
-    if (successMsg) setSuccessMsg("");
   };
 
-  const handleToggleEmployeeSelection = (employeeName: string) => {
-    const current = form.selectedEmployees;
-    if (current.includes(employeeName)) {
+  const handleToggleDepartmentSelection = (deptName: string) => {
+    const current = form.selectedDepartments;
+    if (current.includes(deptName)) {
       handleFormChange(
-        "selectedEmployees",
-        current.filter((name) => name !== employeeName)
+        "selectedDepartments",
+        current.filter((name) => name !== deptName)
       );
     } else {
-      handleFormChange("selectedEmployees", [...current, employeeName]);
+      handleFormChange("selectedDepartments", [...current, deptName]);
     }
   };
 
@@ -431,7 +354,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
   };
 
   const isFormValid =
-    form.selectedEmployees.length > 0 &&
+    form.selectedDepartments.length > 0 &&
     form.date !== "" &&
     form.slotIndex !== "" &&
     form.title &&
@@ -442,20 +365,20 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
 
     const config = typeConfig[form.type as EventType];
     const newIds: string[] = [];
-    const newEntries: ScheduleEntry[] = form.selectedEmployees.map((empName, index) => {
+    const newEntries: ScheduleEntry[] = form.selectedDepartments.map((deptName, index) => {
       const uniqueId = `added-${Date.now()}-${index}`;
       newIds.push(uniqueId);
       return {
         id: uniqueId,
-        date: form.date, // "YYYY-MM-DD"
+        date: form.date,
         slotIndex: Number(form.slotIndex),
         event: {
           title: form.title,
-          detail: form.detail || empName,
+          detail: form.detail || deptName,
           type: form.type as EventType,
           icon: config.icon,
           color: config.color,
-          assignee: empName,
+          assignee: deptName,
         },
       };
     });
@@ -464,17 +387,23 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
   };
 
   const handleRemoveAdded = (id: string) => {
+    // Delete in background
+    if (!id.startsWith("leave-")) {
+      axiosClient.delete(`/schedules/${id}`).catch(console.error);
+    }
+    
     setEntries((prev) => prev.filter((e) => e.id !== id));
     setAddedIds((prev) => prev.filter((i) => i !== id));
   };
 
   const recentlyAdded = entries.filter((e) => addedIds.includes(e.id));
 
-  // Filter entries to show in calendar grid
   const visibleEntries = entries.filter((entry) => {
     if (activeFilters.length === 0) return true;
     return entry.event.assignee && activeFilters.includes(entry.event.assignee);
   });
+
+  const uniqueDepartments = Array.from(new Set(employeesList.map(e => e.department).filter(Boolean)));
 
   return (
     <div className="app-shell">
@@ -492,36 +421,36 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
             <>
               <Link className="nav-item" to="/dashboard">
                 <LayoutDashboard size={18} />
-                {t.dashboard}
+                Dashboard
               </Link>
               <Link className="nav-item" to="/employee">
                 <Users size={18} />
-                {t.employees}
+                Employees
               </Link>
             </>
           ) : (
             <Link className="nav-item" to="/home">
               <House size={18} />
-              {t.home}
+              Home
             </Link>
           )}
           <Link className="nav-item active" to="/schedule">
             <CalendarDays size={18} />
-            {t.schedule}
+            Schedule
           </Link>
           {!isAdmin && (
             <Link className="nav-item" to="/profile">
               <UserRound size={18} />
-              {t.profile}
+              Profile
             </Link>
           )}
           <Link className="nav-item" to="/settings">
             <Settings size={18} />
-            {t.settings}
+            Settings
           </Link>
           <button className="nav-item nav-button" onClick={onLogout} type="button">
             <LogOut size={18} />
-            {t.logout}
+            Logout
           </button>
         </nav>
       </aside>
@@ -529,8 +458,8 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
       <main className="main-content">
         <header className="topbar">
           <div>
-            <p className="eyebrow">{t.eyebrow}</p>
-            <h1>{t.title}</h1>
+            <p className="eyebrow">Work Calendar</p>
+            <h1>Schedule</h1>
           </div>
           <div className="cal-nav">
             <button
@@ -553,26 +482,27 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
               <ChevronRight size={18} />
             </button>
             <button className="cal-today-btn" onClick={goToToday} type="button">
-              {t.today}
+              Today
             </button>
+            <NotificationBell />
           </div>
         </header>
 
         {/* ── Filter Bar ── */}
         <div className="cal-filter-wrapper">
           <div className="cal-filter-bar">
-            <span>{t.filterByEmployee}</span>
+            <span>Filter by Department</span>
             <div className="filter-pills">
-              {employees.map((emp) => {
-                const isActive = activeFilters.includes(emp.name);
+              {uniqueDepartments.map((deptName) => {
+                const isActive = activeFilters.includes(deptName);
                 return (
                   <button
                     type="button"
-                    key={emp.name}
+                    key={deptName}
                     className={`filter-pill ${isActive ? "active" : ""}`}
-                    onClick={() => handleToggleFilter(emp.name)}
+                    onClick={() => handleToggleFilter(deptName)}
                   >
-                    {emp.name}
+                    {deptName}
                   </button>
                 );
               })}
@@ -582,7 +512,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                   className="filter-pill-all"
                   onClick={handleClearFilters}
                 >
-                  {t.clearFilter}
+                  Show All
                 </button>
               )}
             </div>
@@ -601,7 +531,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                   className={`cal-day-header ${isToday ? "cal-today" : ""}`}
                   key={i}
                 >
-                  <span className="cal-day-name">{t.weekDays[i]}</span>
+                  <span className="cal-day-name">{["Mon","Tue","Wed","Thu","Fri","Sat","Sun"][i]}</span>
                   <span
                     className={`cal-day-number ${isToday ? "cal-today-number" : ""}`}
                   >
@@ -612,7 +542,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
             })}
 
             {/* body rows: one per time slot */}
-            {t.timeSlots.map((slot, slotIdx) => (
+            {["8:00 – 10:00","10:00 – 12:00","1:00 – 3:00","3:00 – 5:00"].map((slot, slotIdx) => (
               <div className="cal-row" key={`row-${slotIdx}`}>
                 <div className="cal-time-label">{slot}</div>
                 {weekDates.map((_date, dayIdx) => {
@@ -673,23 +603,22 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                   <Plus size={20} />
                 </div>
                 <div>
-                  <strong>{t.addSchedule}</strong>
-                  <span>{t.addScheduleDesc}</span>
+                  <strong>Add Schedule</strong>
+                  <span>Assign a new schedule item to employees. Select one or multiple employees, pick the date, time slot, and details.</span>
                 </div>
               </button>
             ) : (
               <div className="schedule-add-panel panel">
                 <div className="panel-header">
                   <div>
-                    <h2>{t.addSchedule}</h2>
-                    <p>{t.addScheduleDesc}</p>
+                    <h2>Add Schedule</h2>
+                    <p>Assign a new schedule item to employees. Select one or multiple employees, pick the date, time slot, and details.</p>
                   </div>
                   <button
                     className="icon-button"
                     onClick={() => {
                       setShowForm(false);
                       setForm(emptyForm);
-                      setSuccessMsg("");
                     }}
                     type="button"
                     aria-label="Close"
@@ -698,29 +627,26 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                   </button>
                 </div>
 
-                {successMsg && (
-                  <div className="success-message">{successMsg}</div>
-                )}
 
                 <div className="schedule-add-form">
-                  {/* Row 1: Employee Selection (Multi-select) */}
+                  {/* Row 1: Department Selection (Multi-select) */}
                   <div className="schedule-form-row-full">
                     <label style={{ display: "grid", gap: "8px", fontWeight: 800, fontSize: "14px" }}>
-                      {t.employee}
+                      Departments (select one or multiple)
                       <div className="employee-selector-group">
-                        {employees.filter((emp) => emp.status !== "Leave").map((emp) => {
-                          const isSelected = form.selectedEmployees.includes(emp.name);
+                        {uniqueDepartments.map((deptName) => {
+                          const isSelected = form.selectedDepartments.includes(deptName);
                           return (
                             <button
                               type="button"
-                              key={emp.name}
+                              key={deptName}
                               className={`employee-selector-pill ${isSelected ? "selected" : ""}`}
-                              onClick={() => handleToggleEmployeeSelection(emp.name)}
+                              onClick={() => handleToggleDepartmentSelection(deptName)}
                             >
-                              <span className="avatar-mini">{emp.initials}</span>
+                              <span className="avatar-mini">{deptName.charAt(0)}</span>
                               <div className="emp-info">
-                                <strong>{emp.name}</strong>
-                                <span>{emp.role}</span>
+                                <strong>{deptName}</strong>
+                                <span>Department</span>
                               </div>
                             </button>
                           );
@@ -732,7 +658,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                   {/* Row 2: Date + Time Slot */}
                   <div className="schedule-form-row">
                     <label>
-                      {t.day}
+                      Date
                       <input
                         type="date"
                         value={form.date}
@@ -742,15 +668,15 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                       />
                     </label>
                     <label>
-                      {t.timeSlot}
+                      Time Slot
                       <select
                         value={form.slotIndex}
                         onChange={(e) =>
                           handleFormChange("slotIndex", e.target.value)
                         }
                       >
-                        <option value="">{t.selectSlot}</option>
-                        {t.timeSlots.map((slot, i) => (
+                        <option value="">Select time slot...</option>
+                        {["8:00 – 10:00","10:00 – 12:00","1:00 – 3:00","3:00 – 5:00"].map((slot, i) => (
                           <option key={i} value={i}>
                             {slot}
                           </option>
@@ -762,14 +688,14 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                   {/* Row 3: Type + Title */}
                   <div className="schedule-form-row">
                     <label>
-                      {t.eventType}
+                      Type
                       <select
                         value={form.type}
                         onChange={(e) =>
                           handleFormChange("type", e.target.value)
                         }
                       >
-                        <option value="">{t.selectType}</option>
+                        <option value="">Select type...</option>
                         <option value="Meeting">Meeting</option>
                         <option value="Check-in">Check-in</option>
                         <option value="Interview">Interview</option>
@@ -777,7 +703,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                       </select>
                     </label>
                     <label>
-                      {t.eventTitle}
+                      Event Title
                       <input
                         type="text"
                         value={form.title}
@@ -791,7 +717,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                   {/* Row 4: Detail */}
                   <div className="schedule-form-row">
                     <label style={{ gridColumn: "span 2" }}>
-                      {t.eventDetail}
+                      Detail
                       <input
                         type="text"
                         value={form.detail}
@@ -811,7 +737,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                       type="button"
                     >
                       <Plus size={16} />
-                      {scheduleMutation.isPending ? "Adding..." : t.addBtn}
+                      {scheduleMutation.isPending ? "Adding..." : "Add to Schedule"}
                     </button>
                     <button
                       className="secondary-button"
@@ -822,7 +748,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                       }}
                       type="button"
                     >
-                      {t.cancel}
+                      Cancel
                     </button>
                   </div>
                 </div>
@@ -834,8 +760,8 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
               <div className="schedule-recent panel">
                 <div className="panel-header">
                   <div>
-                    <h2>{t.recentlyAdded}</h2>
-                    <p>{t.recentlyAddedDesc}</p>
+                    <h2>Recently Added</h2>
+                    <p>Items you've added this session.</p>
                   </div>
                 </div>
                 <div className="schedule-recent-list">
@@ -858,7 +784,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                           <span>
                             {entry.event.assignee} ·{" "}
                             {formatDisplayDate(entry.date, settings.language)} ·{" "}
-                            {t.timeSlots[entry.slotIndex]}
+                            {["8:00 – 10:00","10:00 – 12:00","1:00 – 3:00","3:00 – 5:00"][entry.slotIndex]}
                           </span>
                         </div>
                         <span className="status-badge active">{entry.event.type}</span>
@@ -866,8 +792,8 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                           className="schedule-recent-remove"
                           onClick={() => handleRemoveAdded(entry.id)}
                           type="button"
-                          aria-label={t.remove}
-                          title={t.remove}
+                          aria-label="Remove"
+                          title="Remove"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -893,23 +819,22 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                   <Plane size={20} />
                 </div>
                 <div>
-                  <strong>{t.requestLeave}</strong>
-                  <span>{t.requestLeaveDesc}</span>
+                  <strong>Request Leave</strong>
+                  <span>Submit a new leave request. It will be shown on the calendar as pending approval.</span>
                 </div>
               </button>
             ) : (
               <div className="schedule-add-panel panel">
                 <div className="panel-header">
                   <div>
-                    <h2>{t.requestLeave}</h2>
-                    <p>{t.requestLeaveDesc}</p>
+                    <h2>Request Leave</h2>
+                    <p>Submit a new leave request. It will be shown on the calendar as pending approval.</p>
                   </div>
                   <button
                     className="icon-button"
                     onClick={() => {
                       setShowLeaveForm(false);
                       setLeaveForm(emptyLeaveForm);
-                      setSuccessLeaveMsg("");
                     }}
                     type="button"
                     aria-label="Close"
@@ -918,15 +843,12 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                   </button>
                 </div>
 
-                {successLeaveMsg && (
-                  <div className="success-message">{successLeaveMsg}</div>
-                )}
 
                 <div className="schedule-add-form">
                   {/* Row 1: Start Date + End Date */}
                   <div className="schedule-form-row">
                     <label>
-                      {t.startDate}
+                      Start Date
                       <input
                         type="date"
                         value={leaveForm.startDate}
@@ -936,7 +858,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                       />
                     </label>
                     <label>
-                      {t.endDate}
+                      End Date
                       <input
                         type="date"
                         value={leaveForm.endDate}
@@ -950,21 +872,21 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                   {/* Row 2: Leave Type + Reason */}
                   <div className="schedule-form-row">
                     <label>
-                      {t.leaveType}
+                      Leave Type
                       <select
                         value={leaveForm.type}
                         onChange={(e) =>
                           handleLeaveFormChange("type", e.target.value)
                         }
                       >
-                        <option value="">{t.selectLeaveType}</option>
-                        <option value="Annual">{t.annualLeave}</option>
-                        <option value="Sick">{t.sickLeave}</option>
-                        <option value="Unpaid">{t.unpaidLeave}</option>
+                        <option value="">Select leave type...</option>
+                        <option value="Annual">Annual Leave</option>
+                        <option value="Sick">Sick Leave</option>
+                        <option value="Unpaid">Unpaid Leave</option>
                       </select>
                     </label>
                     <label>
-                      {t.reason}
+                      Reason
                       <input
                         type="text"
                         value={leaveForm.reason}
@@ -984,7 +906,7 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                       type="button"
                     >
                       <Plane size={16} />
-                      {leaveMutation.isPending ? "Submitting..." : t.submitRequest}
+                      {leaveMutation.isPending ? "Submitting..." : "Submit Leave Request"}
                     </button>
                     <button
                       className="secondary-button"
@@ -995,66 +917,106 @@ export function SchedulePage({ role, settings, onLogout }: SchedulePageProps) {
                       }}
                       type="button"
                     >
-                      {t.cancel}
+                      Cancel
                     </button>
                   </div>
                 </div>
               </div>
             )}
+          </section>
+        )}
 
-            {/* Leave request history */}
-            {leaveRequests.length > 0 && (
-              <div className="schedule-recent panel">
-                <div className="panel-header">
-                  <div>
-                    <h2>{t.leaveHistory}</h2>
-                    <p>{t.leaveHistoryDesc}</p>
-                  </div>
+        {/* Leave request history (Visible to Both User and Admin) */}
+        {leaveRequests.length > 0 && (
+          <section className="schedule-admin-section">
+            <div className="schedule-recent panel">
+              <div className="panel-header">
+                <div>
+                  <h2>Leave History</h2>
+                  <p>{isAdmin ? "Manage all employee leave requests." : "Your submitted leave requests and their statuses."}</p>
                 </div>
-                <div className="schedule-recent-list">
-                  {leaveRequests.map((req) => {
-                    const leaveColor = req.type === "Annual" ? "#0f766e" : req.type === "Sick" ? "#b91c1c" : "#b45309";
-                    const leaveTitleMap = {
-                      Annual: t.annualLeave,
-                      Sick: t.sickLeave,
-                      Unpaid: t.unpaidLeave,
-                    };
-                    return (
-                      <div className="schedule-recent-item" key={req.id}>
-                        <div
-                          className="schedule-recent-icon"
-                          style={
-                            {
-                              "--event-color": leaveColor,
-                            } as React.CSSProperties
-                          }
-                        >
-                          <Plane size={16} />
-                        </div>
-                        <div className="schedule-recent-info">
-                          <strong>{leaveTitleMap[req.type as LeaveType]}</strong>
-                          <span>
-                            {formatDisplayDate(req.startDate, settings.language)} – {formatDisplayDate(req.endDate, settings.language)} · {req.reason}
-                          </span>
-                        </div>
-                        <span className="status-badge onboarding" style={{ color: "#d97706", background: "#fef3c7" }}>
-                          {t.pending}
+              </div>
+              <div className="schedule-recent-list">
+                {leaveRequests.map((req: any) => {
+                  const leaveColor = req.type === "Annual" ? "#0f766e" : req.type === "Sick" ? "#b91c1c" : "#b45309";
+                  const leaveTitleMap = {
+                    Annual: "Annual Leave",
+                    Sick: "Sick Leave",
+                    Unpaid: "Unpaid Leave",
+                  };
+                  
+                  const employeeName = req.employee 
+                    ? `${req.employee.firstName} ${req.employee.lastName}` 
+                    : "";
+                    
+                  const displayTitle = isAdmin 
+                    ? `${employeeName} - ${leaveTitleMap[req.type as LeaveType]}`
+                    : leaveTitleMap[req.type as LeaveType];
+
+                  const statusColor = req.status === "Approved" ? "#16a34a" : req.status === "Rejected" ? "#dc2626" : "#d97706";
+                  const statusBg = req.status === "Approved" ? "#dcfce7" : req.status === "Rejected" ? "#fee2e2" : "#fef3c7";
+
+                  return (
+                    <div className="schedule-recent-item" key={req.id}>
+                      <div
+                        className="schedule-recent-icon"
+                        style={
+                          {
+                            "--event-color": leaveColor,
+                          } as React.CSSProperties
+                        }
+                      >
+                        <Plane size={16} />
+                      </div>
+                      <div className="schedule-recent-info">
+                        <strong>{displayTitle}</strong>
+                        <span>
+                          {formatDisplayDate(req.startDate, settings.language)} – {formatDisplayDate(req.endDate, settings.language)} · {req.reason}
                         </span>
+                      </div>
+                      <span className="status-badge onboarding" style={{ color: statusColor, background: statusBg }}>
+                        {req.status}
+                      </span>
+                      
+                      {!isAdmin && req.status === "Pending" && (
                         <button
                           className="schedule-recent-remove"
                           onClick={() => handleCancelLeave(req.id)}
                           type="button"
-                          aria-label={t.remove}
-                          title={t.remove}
+                          aria-label="Remove"
+                          title="Remove"
                         >
                           <Trash2 size={14} />
                         </button>
-                      </div>
-                    );
-                  })}
-                </div>
+                      )}
+                      
+                      {isAdmin && req.status === "Pending" && (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            className="schedule-recent-remove"
+                            style={{ color: "#16a34a", background: "#dcfce7" }}
+                            onClick={() => updateLeaveStatusMutation.mutate({ id: req.id, status: "Approved" })}
+                            type="button"
+                            title="Approve"
+                          >
+                            <Check size={14} />
+                          </button>
+                          <button
+                            className="schedule-recent-remove"
+                            style={{ color: "#dc2626", background: "#fee2e2" }}
+                            onClick={() => updateLeaveStatusMutation.mutate({ id: req.id, status: "Rejected" })}
+                            type="button"
+                            title="Reject"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            )}
+            </div>
           </section>
         )}
       </main>

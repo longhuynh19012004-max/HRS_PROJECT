@@ -11,46 +11,38 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService
-  ) {}
+  ) { }
 
-  // 🔑 ĐĂNG NHẬP
   async login(loginDto: LoginDto) {
-    // 1. Tìm tài khoản bằng email
     const account = await this.usersService.findAccountByEmail(loginDto.email);
-    
-    // 2. Chặn nếu không có tài khoản hoặc chưa thiết lập mật khẩu (Account mới tạo)
+
     if (!account || !account.password) {
-      throw new UnauthorizedException('Email hoặc mật khẩu không đúng!');
+      throw new UnauthorizedException('Invalid email or password!');
     }
 
-    // 3. Kiểm tra mật khẩu mã hóa
     const isPasswordValid = await bcrypt.compare(loginDto.password, account.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Email hoặc mật khẩu không đúng!');
+      throw new UnauthorizedException('Invalid email or password!');
     }
 
-    // 4. Cấp Token chứa quyền hạn (role)
     const payload = { sub: account.id, email: account.email, role: account.role };
-    
+
     return {
-      message: 'Đăng nhập thành công!',
+      message: 'Login successful!',
       access_token: await this.jwtService.signAsync(payload),
     };
   }
 
-  // 📝 ĐĂNG KÝ (Admin tạo nhân viên)
   async register(registerDto: RegisterDto) {
-    const { email, password } = registerDto;
+    const { email, password, fullName } = registerDto;
 
-    // 1. Tiến hành băm nhỏ mật khẩu để bảo mật
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 2. Gọi hàm lưu trữ trực tiếp của UsersService
-    const newAccount = await this.usersService.registerFreeAccount(email, hashedPassword);
+    const newAccount = await this.usersService.registerFreeAccount(email, hashedPassword, fullName);
 
     return {
-      message: 'Đăng ký tài khoản thành công!',
+      message: 'Registration successful!',
       userId: newAccount.id,
       email: newAccount.email,
     };
